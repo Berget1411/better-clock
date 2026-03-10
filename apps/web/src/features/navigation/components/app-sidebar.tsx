@@ -1,12 +1,11 @@
 import {
   BotIcon,
-  BookOpenIcon,
   CommandIcon,
   FolderIcon,
   HomeIcon,
-  LifeBuoyIcon,
   ListTodoIcon,
   Clock,
+  TagIcon,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -18,13 +17,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@open-learn/ui/components/sidebar";
 
 import NavMain from "./nav-main";
-import NavSecondary from "./nav-secondary";
 import NavUser from "./nav-user";
-import NavWorkspaces from "./nav-workspaces";
+import NavManage from "./nav-manage";
 
 const navMainItems = [
   {
@@ -44,37 +41,29 @@ const navMainItems = [
   },
 ] as const;
 
-const workspaceItems = [
+const navManageItems = [
   {
-    name: "Core",
-    subtitle: "Main workspace",
+    title: "Organization",
     to: "/",
     icon: CommandIcon,
   },
   {
-    name: "Tasks",
+    title: "Projects",
     subtitle: "Shipping list",
     to: "/todos",
     icon: FolderIcon,
   },
   {
-    name: "Lab",
+    title: "Clients",
     subtitle: "AI experiments",
     to: "/ai",
     icon: BotIcon,
   },
-] as const;
-
-const secondaryItems = [
   {
-    title: "Sidebar Docs",
-    href: "https://ui.shadcn.com/docs/components/sidebar",
-    icon: BookOpenIcon,
-  },
-  {
-    title: "Router Docs",
-    href: "https://tanstack.com/router/latest",
-    icon: LifeBuoyIcon,
+    title: "Tags",
+    subtitle: "Manage your tags",
+    to: "/ai",
+    icon: TagIcon,
   },
 ] as const;
 
@@ -99,10 +88,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMainItems} />
-        <SidebarSeparator />
-        <NavWorkspaces items={workspaceItems} />
-        <SidebarSeparator />
-        <NavSecondary items={secondaryItems} />
+        <NavManage items={navManageItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

@@ -1,4 +1,6 @@
 import type { LucideIcon } from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import type { RegisteredRouter, ToPathOption } from "@tanstack/react-router";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -8,29 +10,31 @@ import {
   SidebarMenuItem,
 } from "@open-learn/ui/components/sidebar";
 
-interface NavSecondaryItem {
+interface NavManageItem {
   title: string;
-  href: string;
+  to: ToPathOption<RegisteredRouter>;
   icon: LucideIcon;
 }
 
-interface NavSecondaryProps {
-  items: readonly NavSecondaryItem[];
+interface NavManageProps {
+  items: readonly NavManageItem[];
 }
 
-export default function NavSecondary({ items }: NavSecondaryProps) {
+export default function NavManage({ items }: NavManageProps) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Resources</SidebarGroupLabel>
+      <SidebarGroupLabel>Manage</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <a href={item.href} target="_blank" rel="noreferrer">
+              <SidebarMenuButton asChild isActive={pathname === item.to} tooltip={item.title}>
+                <Link to={item.to}>
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

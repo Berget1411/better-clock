@@ -72,7 +72,7 @@ export const organizationService = {
   },
 
   async inviteMember(sessionToken: string, input: InviteMemberInput) {
-    const result = await auth.api.inviteMember({
+    const result = await auth.api.createInvitation({
       headers: buildHeaders(sessionToken),
       body: {
         email: input.email,

@@ -44,8 +44,12 @@ export default function SignUpForm({
               try {
                 await authClient.organization.acceptInvitation({ invitationId });
                 toast.success("Account created — you've joined the organisation");
-              } catch {
-                // Best-effort; navigate regardless
+              } catch (err: unknown) {
+                toast.error(
+                  err instanceof Error
+                    ? err.message
+                    : "Failed to accept invitation. Please try again.",
+                );
               }
             } else {
               toast.success("Sign up successful");

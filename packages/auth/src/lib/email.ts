@@ -1,6 +1,14 @@
 import nodemailer from "nodemailer";
 import { env } from "@open-learn/env/server";
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function createTransporter() {
   return nodemailer.createTransport({
     service: "gmail",
@@ -23,6 +31,8 @@ export async function sendInvitationEmail({
   inviteLink: string;
 }) {
   const transporter = createTransporter();
+  const safeInviterName = escapeHtml(inviterName);
+  const safeOrgName = escapeHtml(orgName);
 
   await transporter.sendMail({
     from: `"Open Clock" <${env.GMAIL_USER}>`,
@@ -32,7 +42,7 @@ export async function sendInvitationEmail({
       <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a1a;">
         <h2 style="font-size: 20px; margin-bottom: 8px;">You're invited to Open Clock</h2>
         <p style="margin-bottom: 16px; color: #555;">
-          <strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong>.
+          <strong>${safeInviterName}</strong> has invited you to join <strong>${safeOrgName}</strong>.
         </p>
         <a href="${inviteLink}"
            style="display: inline-block; padding: 10px 20px; background: #18a0a0; color: #fff;

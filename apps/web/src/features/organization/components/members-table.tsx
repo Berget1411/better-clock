@@ -1,13 +1,5 @@
 import * as React from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  flexRender,
-  createColumnHelper,
-  type ColumnFiltersState,
-} from "@tanstack/react-table";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { MoreHorizontal, UserPlus, Search } from "lucide-react";
 
@@ -66,10 +58,6 @@ interface Invitation {
 }
 
 type Row = ({ kind: "member" } & Member) | ({ kind: "invitation" } & Invitation);
-
-// ─── Column helper ────────────────────────────────────────────────────────────
-
-const col = createColumnHelper<Row>();
 
 // ─── Invite modal ─────────────────────────────────────────────────────────────
 
@@ -156,7 +144,6 @@ function InviteModal({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function MembersTable({ orgId }: { orgId: string }) {
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState<string>("all");
   const [inviteOpen, setInviteOpen] = React.useState(false);

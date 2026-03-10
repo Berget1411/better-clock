@@ -2,7 +2,7 @@ import { db } from "@open-learn/db";
 import * as schema from "@open-learn/db/schema/auth";
 import { env } from "@open-learn/env/server";
 import { polar, checkout, portal } from "@polar-sh/better-auth";
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { organization } from "better-auth/plugins";
 import { dash } from "@better-auth/infra";
@@ -10,12 +10,13 @@ import { dash } from "@better-auth/infra";
 import { polarClient } from "./lib/payments";
 import { sendInvitationEmail } from "./lib/email";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const auth: any = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema: schema,
-  }),
+const database: BetterAuthOptions["database"] = drizzleAdapter(db, {
+  provider: "pg",
+  schema: schema,
+});
+
+export const auth = betterAuth({
+  database,
   trustedOrigins: [env.CORS_ORIGIN],
   emailAndPassword: {
     enabled: true,

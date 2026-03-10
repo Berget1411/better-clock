@@ -18,7 +18,9 @@ export async function createContext({ context }: CreateContextOptions): Promise<
       .split(";")
       .map((c) => c.trim())
       .find((c) => c.startsWith("better-auth.session_token="))
-      ?.split("=")[1] ?? null;
+      ?.split("=")
+      .slice(1)
+      .join("=") ?? null;
 
   return {
     session,

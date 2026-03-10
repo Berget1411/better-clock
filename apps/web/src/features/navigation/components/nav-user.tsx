@@ -27,6 +27,7 @@ import { ChevronsUpDownIcon, LogOutIcon, Settings2Icon, SunMoonIcon } from "luci
 
 import { useTheme } from "@/components/theme-provider";
 import { AUTH_REDIRECT } from "@/features/auth/constants";
+import { invalidateSessionCache } from "@/features/auth/utils/require-auth";
 import { authClient } from "@/lib/auth-client";
 
 import SettingsDialog from "../../auth/components/settings-dialog";
@@ -125,6 +126,7 @@ export default function NavUser() {
                     authClient.signOut({
                       fetchOptions: {
                         onSuccess: () => {
+                          invalidateSessionCache();
                           navigate({ to: AUTH_REDIRECT.afterSignOut });
                         },
                       },

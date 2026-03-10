@@ -16,6 +16,8 @@ import { Input } from "@open-learn/ui/components/input";
 
 import { useStartTimer, useStopTimer, useUpdateActiveTimer } from "../services/mutations";
 import { formatDuration, getElapsedSeconds, getTimerFormValues } from "../utils/date-time";
+import { BillableBadge } from "./billable-badge";
+import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactProjectPicker } from "./compact-project-picker";
 import { CompactTagPicker } from "./compact-tag-picker";
 
@@ -49,7 +51,7 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
           description: value.description.trim(),
           projectId: value.projectId,
           tagIds: value.tagIds,
-          isBillable: false,
+          isBillable: value.isBillable,
         });
         await stopTimer.mutateAsync({ entryId: activeEntry.id });
         return;
@@ -59,7 +61,7 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
         description: value.description.trim(),
         projectId: value.projectId,
         tagIds: value.tagIds,
-        isBillable: false,
+        isBillable: value.isBillable,
       });
       form.reset(getTimerFormValues(null));
       setDetailsOpen(false);
@@ -141,8 +143,19 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
                           />
                         )}
                       </form.Field>
+
+                      <form.Field name="isBillable">
+                        {(billableField) => (
+                          <CompactBillableToggle
+                            checked={billableField.state.value}
+                            onCheckedChange={billableField.handleChange}
+                          />
+                        )}
+                      </form.Field>
                     </>
                   ) : null}
+
+                  {activeEntry ? <BillableBadge isBillable={activeEntry.isBillable} /> : null}
 
                   <div className="flex min-w-32 items-center justify-center px-3 text-lg font-semibold tabular-nums text-foreground">
                     {elapsedLabel}
@@ -204,6 +217,15 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
                   onChange={tagField.handleChange}
                   tags={tags}
                   range={range}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="isBillable">
+              {(billableField) => (
+                <CompactBillableToggle
+                  checked={billableField.state.value}
+                  onCheckedChange={billableField.handleChange}
                 />
               )}
             </form.Field>

@@ -18,6 +18,7 @@ import {
   isNextDay,
 } from "../utils/date-time";
 import { ActivityInlineEditor } from "./activity-inline-editor";
+import { BillableBadge } from "./billable-badge";
 
 interface ActivityRowProps {
   entry: TrackerEntry;
@@ -84,6 +85,7 @@ export function ActivityRow({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 md:flex-nowrap">
+            <BillableBadge isBillable={entry.isBillable} />
             {entry.project ? <Badge variant="outline">{entry.project.name}</Badge> : null}
             {entry.tags.map((tag) => (
               <Badge key={tag.id} variant="ghost">

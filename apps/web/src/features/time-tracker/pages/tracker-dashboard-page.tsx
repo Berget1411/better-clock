@@ -44,6 +44,10 @@ const dailyChartConfig = {
     label: "Tracked hours",
     color: "hsl(174 84% 32%)",
   },
+  billableHours: {
+    label: "Billable hours",
+    color: "hsl(200 78% 46%)",
+  },
 } satisfies ChartConfig;
 
 const projectChartConfig = {
@@ -53,29 +57,49 @@ const projectChartConfig = {
   },
 } satisfies ChartConfig;
 
+type BreakdownMode = "project" | "billability";
+
 export default function TrackerDashboardPage() {
   const [rangeKey, setRangeKey] = useState<DashboardRangeKey>("30d");
-  const [projectFilter, setProjectFilter] = useState("all");
+  const [breakdownMode, setBreakdownMode] = useState<BreakdownMode>("project");
   const range = useMemo(() => getDashboardRange(rangeKey), [rangeKey]);
   const trackerOverview = useTrackerOverviewQuery(range);
-  const projectId = projectFilter === "all" ? null : Number(projectFilter);
   const metrics = useMemo(
     () =>
       buildTrackerDashboardMetrics({
         entries: trackerOverview.data?.entries ?? [],
-        projects: trackerOverview.data?.projects ?? [],
         tags: trackerOverview.data?.tags ?? [],
         rangeKey,
-        projectId,
       }),
-    [
-      projectId,
-      rangeKey,
-      trackerOverview.data?.entries,
-      trackerOverview.data?.projects,
-      trackerOverview.data?.tags,
-    ],
+    [rangeKey, trackerOverview.data?.entries, trackerOverview.data?.tags],
   );
+  const breakdownItems = useMemo(() => {
+    if (breakdownMode === "billability") {
+      return [
+        {
+          name: "Billable",
+          seconds: metrics.billableSeconds,
+          hours: metrics.billableSeconds / 3600,
+          percentage: metrics.billableShare,
+          fill: "hsl(200 78% 46%)",
+        },
+        {
+          name: "Non-billable",
+          seconds: metrics.nonBillableSeconds,
+          hours: metrics.nonBillableSeconds / 3600,
+          percentage: metrics.nonBillableShare,
+          fill: "hsl(210 16% 82%)",
+        },
+      ].filter((item) => item.seconds > 0);
+    }
+
+    return metrics.projects;
+  }, [breakdownMode, metrics]);
+  const breakdownTitle = breakdownMode === "project" ? "Project split" : "Billable split";
+  const breakdownDescription =
+    breakdownMode === "project"
+      ? "Distribution of tracked time across projects"
+      : "Distribution of tracked time across billable and non-billable work";
 
   const rangeLabel =
     DASHBOARD_RANGE_OPTIONS.find((option) => option.key === rangeKey)?.label ?? "Last 30 days";
@@ -96,16 +120,13 @@ export default function TrackerDashboardPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <FilterSelect
-            ariaLabel="Select project"
-            value={projectFilter}
-            onValueChange={setProjectFilter}
+            ariaLabel="Select breakdown type"
+            value={breakdownMode}
+            onValueChange={(value) => setBreakdownMode(value as BreakdownMode)}
             placeholder="Project"
             options={[
-              { value: "all", label: "Project" },
-              ...(trackerOverview.data?.projects ?? []).map((project) => ({
-                value: String(project.id),
-                label: project.name,
-              })),
+              { value: "project", label: "Project" },
+              { value: "billability", label: "Billability" },
             ]}
           />
           <FilterSelect
@@ -191,8 +212,21 @@ export default function TrackerDashboardPage() {
                         maxBarSize={28}
                         radius={[0, 0, 0, 0]}
                       />
+                      <Bar
+                        dataKey="billableHours"
+                        fill="var(--color-billableHours)"
+                        maxBarSize={28}
+                        radius={[0, 0, 0, 0]}
+                      />
                     </BarChart>
                   </ChartContainer>
+                </div>
+
+                <div className="border-t border-border/70 bg-muted/20 px-3 py-2 md:px-4">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    {breakdownTitle}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{breakdownDescription}</p>
                 </div>
 
                 <div className="grid gap-5 px-3 py-4 md:px-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center">
@@ -204,7 +238,7 @@ export default function TrackerDashboardPage() {
                       <PieChart>
                         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
                         <Pie
-                          data={metrics.projects}
+                          data={breakdownItems}
                           dataKey="hours"
                           nameKey="name"
                           innerRadius={54}
@@ -212,8 +246,8 @@ export default function TrackerDashboardPage() {
                           paddingAngle={2}
                           strokeWidth={0}
                         >
-                          {metrics.projects.map((project) => (
-                            <Cell key={project.name} fill={project.fill} />
+                          {breakdownItems.map((item) => (
+                            <Cell key={item.name} fill={item.fill} />
                           ))}
                         </Pie>
                       </PieChart>
@@ -226,18 +260,18 @@ export default function TrackerDashboardPage() {
                   </div>
 
                   <div className="space-y-4">
-                    {metrics.projects.map((project) => (
+                    {breakdownItems.map((item) => (
                       <div
-                        key={project.name}
+                        key={item.name}
                         className="grid gap-2 sm:grid-cols-[minmax(0,220px)_auto_minmax(120px,1fr)_auto] sm:items-center"
                       >
-                        <div className="truncate text-sm font-medium">{project.name}</div>
+                        <div className="truncate text-sm font-medium">{item.name}</div>
                         <div className="text-sm text-muted-foreground">
-                          {formatMetricDuration(project.seconds)}
+                          {formatMetricDuration(item.seconds)}
                         </div>
-                        <ShareBar percentage={project.percentage} color={project.fill} />
+                        <ShareBar percentage={item.percentage} color={item.fill} />
                         <div className="text-right text-sm text-muted-foreground">
-                          {formatProjectShare(project.percentage)}
+                          {formatProjectShare(item.percentage)}
                         </div>
                       </div>
                     ))}

@@ -2,16 +2,54 @@ import { redirect } from "@tanstack/react-router";
 
 import { authClient } from "@/lib/auth-client";
 
+const SESSION_CACHE_TTL_MS = 15_000;
+
+type SessionResult = Awaited<ReturnType<typeof authClient.getSession>>;
+
+let cachedSession: SessionResult | null = null;
+let cachedSessionExpiresAt = 0;
+let inflightSession: Promise<SessionResult> | null = null;
+
+async function getCachedSession() {
+  const now = Date.now();
+
+  if (cachedSession && cachedSessionExpiresAt > now) {
+    return cachedSession;
+  }
+
+  if (inflightSession) {
+    return inflightSession;
+  }
+
+  inflightSession = authClient.getSession().then((session) => {
+    cachedSession = session;
+    cachedSessionExpiresAt = Date.now() + SESSION_CACHE_TTL_MS;
+
+    return session;
+  });
+
+  try {
+    return await inflightSession;
+  } finally {
+    inflightSession = null;
+  }
+}
+
+export function invalidateSessionCache() {
+  cachedSession = null;
+  cachedSessionExpiresAt = 0;
+  inflightSession = null;
+}
+
 export async function requireAuthBeforeLoad() {
-  const session = await authClient.getSession();
+  const session = await getCachedSession();
 
   if (!session.data) {
+    invalidateSessionCache();
     redirect({ to: "/login", throw: true });
   }
 
-  const { data: customerState } = await authClient.customer.state();
-
-  return { session, customerState };
+  return { session };
 }
 
 export type AuthRouteContext = Awaited<ReturnType<typeof requireAuthBeforeLoad>>;

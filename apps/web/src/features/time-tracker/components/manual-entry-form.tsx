@@ -17,6 +17,7 @@ import {
   formatRelativeDateLabel,
   getDefaultManualValues,
 } from "../utils/date-time";
+import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactDatePicker } from "./compact-date-picker";
 import { CompactProjectPicker } from "./compact-project-picker";
 import { CompactTagPicker } from "./compact-tag-picker";
@@ -67,7 +68,7 @@ export function ManualEntryForm({ projects, tags, range }: ManualEntryFormProps)
         description: value.description.trim(),
         projectId: value.projectId,
         tagIds: value.tagIds,
-        isBillable: false,
+        isBillable: value.isBillable,
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
       });
@@ -133,6 +134,15 @@ export function ManualEntryForm({ projects, tags, range }: ManualEntryFormProps)
                             onChange={tagField.handleChange}
                             tags={tags}
                             range={range}
+                          />
+                        )}
+                      </form.Field>
+
+                      <form.Field name="isBillable">
+                        {(billableField) => (
+                          <CompactBillableToggle
+                            checked={billableField.state.value}
+                            onCheckedChange={billableField.handleChange}
                           />
                         )}
                       </form.Field>

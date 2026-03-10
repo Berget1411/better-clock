@@ -46,6 +46,7 @@ export interface DashboardDailyDatum {
   dateKey: string;
   label: string;
   totalHours: number;
+  billableHours: number;
 }
 
 export interface DashboardProjectDatum {
@@ -66,6 +67,10 @@ export interface DashboardActivityDatum {
 
 export interface TrackerDashboardMetrics {
   totalSeconds: number;
+  billableSeconds: number;
+  nonBillableSeconds: number;
+  billableShare: number;
+  nonBillableShare: number;
   averageDaySeconds: number;
   trackedDays: number;
   topProjectName: string;
@@ -157,28 +162,17 @@ export function formatProjectShare(percentage: number) {
 
 export function buildTrackerDashboardMetrics({
   entries,
-  projects,
   tags,
   rangeKey,
-  projectId,
 }: {
   entries: DashboardEntry[];
-  projects: DashboardProject[];
   tags: DashboardTag[];
   rangeKey: DashboardRangeKey;
-  projectId: number | null;
 }): TrackerDashboardMetrics {
   const tagMap = new Map<number, DashboardTag>(tags.map((tag) => [tag.id, tag]));
   const totalDays = getRangeDays(rangeKey);
   const today = startOfLocalDay(new Date());
   const firstDay = addDays(today, -(totalDays - 1));
-  const filteredEntries = entries.filter((entry) => {
-    if (projectId === null) {
-      return true;
-    }
-
-    return entry.project?.id === projectId;
-  });
 
   const dailyMap = new Map<string, DashboardDailyDatum>();
   for (let index = 0; index < totalDays; index += 1) {
@@ -188,6 +182,7 @@ export function buildTrackerDashboardMetrics({
       dateKey,
       label: formatAxisLabel(day),
       totalHours: 0,
+      billableHours: 0,
     });
   }
 
@@ -199,9 +194,10 @@ export function buildTrackerDashboardMetrics({
   >();
 
   let totalSeconds = 0;
+  let billableSeconds = 0;
   let totalSessions = 0;
 
-  for (const entry of filteredEntries) {
+  for (const entry of entries) {
     const durationSeconds = getEntryDurationSeconds(entry);
 
     if (durationSeconds <= 0) {
@@ -211,6 +207,10 @@ export function buildTrackerDashboardMetrics({
     totalSessions += 1;
     totalSeconds += durationSeconds;
 
+    if (entry.isBillable) {
+      billableSeconds += durationSeconds;
+    }
+
     const startDate = new Date(entry.startAt);
     const dateKey = toDateKey(startDate);
     const day = dailyMap.get(dateKey);
@@ -218,6 +218,10 @@ export function buildTrackerDashboardMetrics({
 
     if (day) {
       day.totalHours += durationHours;
+
+      if (entry.isBillable) {
+        day.billableHours += durationHours;
+      }
     }
 
     const projectName = entry.project?.name ?? "Without project";
@@ -288,6 +292,11 @@ export function buildTrackerDashboardMetrics({
 
   return {
     totalSeconds,
+    billableSeconds,
+    nonBillableSeconds: totalSeconds - billableSeconds,
+    billableShare: totalSeconds > 0 ? (billableSeconds / totalSeconds) * 100 : 0,
+    nonBillableShare:
+      totalSeconds > 0 ? ((totalSeconds - billableSeconds) / totalSeconds) * 100 : 0,
     averageDaySeconds,
     trackedDays,
     topProjectName,

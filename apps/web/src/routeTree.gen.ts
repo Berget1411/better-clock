@@ -8,175 +8,182 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as SuccessRouteImport } from "./routes/success";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as AppRouteImport } from "./routes/_app";
-import { Route as AppIndexRouteImport } from "./routes/_app.index";
-import { Route as AppTrackerRouteImport } from "./routes/_app.tracker";
-import { Route as AppTodosRouteImport } from "./routes/_app.todos";
-import { Route as AppReportsRouteImport } from "./routes/_app.reports";
-import { Route as AppAiRouteImport } from "./routes/_app.ai";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppTrackerRouteImport } from './routes/_app.tracker'
+import { Route as AppTodosRouteImport } from './routes/_app.todos'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppAiRouteImport } from './routes/_app.ai'
 
 const SuccessRoute = SuccessRouteImport.update({
-  id: "/success",
-  path: "/success",
+  id: '/success',
+  path: '/success',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AppRoute = AppRouteImport.update({
-  id: "/_app",
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppTrackerRoute = AppTrackerRouteImport.update({
-  id: "/tracker",
-  path: "/tracker",
+  id: '/tracker',
+  path: '/tracker',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppTodosRoute = AppTodosRouteImport.update({
-  id: "/todos",
-  path: "/todos",
+  id: '/todos',
+  path: '/todos',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppReportsRoute = AppReportsRouteImport.update({
-  id: "/reports",
-  path: "/reports",
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppAiRoute = AppAiRouteImport.update({
-  id: "/ai",
-  path: "/ai",
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof AppIndexRoute;
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/ai": typeof AppAiRoute;
-  "/reports": typeof AppReportsRoute;
-  "/todos": typeof AppTodosRoute;
-  "/tracker": typeof AppTrackerRoute;
+  '/': typeof AppIndexRoute
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/ai': typeof AppAiRoute
+  '/reports': typeof AppReportsRoute
+  '/todos': typeof AppTodosRoute
+  '/tracker': typeof AppTrackerRoute
 }
 export interface FileRoutesByTo {
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/ai": typeof AppAiRoute;
-  "/reports": typeof AppReportsRoute;
-  "/todos": typeof AppTodosRoute;
-  "/tracker": typeof AppTrackerRoute;
-  "/": typeof AppIndexRoute;
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/ai': typeof AppAiRoute
+  '/reports': typeof AppReportsRoute
+  '/todos': typeof AppTodosRoute
+  '/tracker': typeof AppTrackerRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/_app": typeof AppRouteWithChildren;
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/_app/ai": typeof AppAiRoute;
-  "/_app/reports": typeof AppReportsRoute;
-  "/_app/todos": typeof AppTodosRoute;
-  "/_app/tracker": typeof AppTrackerRoute;
-  "/_app/": typeof AppIndexRoute;
+  __root__: typeof rootRouteImport
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/_app/ai': typeof AppAiRoute
+  '/_app/reports': typeof AppReportsRoute
+  '/_app/todos': typeof AppTodosRoute
+  '/_app/tracker': typeof AppTrackerRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/login" | "/success" | "/ai" | "/reports" | "/todos" | "/tracker";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/login" | "/success" | "/ai" | "/reports" | "/todos" | "/tracker" | "/";
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/success'
+    | '/ai'
+    | '/reports'
+    | '/todos'
+    | '/tracker'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/login' | '/success' | '/ai' | '/reports' | '/todos' | '/tracker' | '/'
   id:
-    | "__root__"
-    | "/_app"
-    | "/login"
-    | "/success"
-    | "/_app/ai"
-    | "/_app/reports"
-    | "/_app/todos"
-    | "/_app/tracker"
-    | "/_app/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/_app'
+    | '/login'
+    | '/success'
+    | '/_app/ai'
+    | '/_app/reports'
+    | '/_app/todos'
+    | '/_app/tracker'
+    | '/_app/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AppRoute: typeof AppRouteWithChildren;
-  LoginRoute: typeof LoginRoute;
-  SuccessRoute: typeof SuccessRoute;
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SuccessRoute: typeof SuccessRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/success": {
-      id: "/success";
-      path: "/success";
-      fullPath: "/success";
-      preLoaderRoute: typeof SuccessRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_app": {
-      id: "/_app";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AppRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_app/": {
-      id: "/_app/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof AppIndexRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/tracker": {
-      id: "/_app/tracker";
-      path: "/tracker";
-      fullPath: "/tracker";
-      preLoaderRoute: typeof AppTrackerRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/todos": {
-      id: "/_app/todos";
-      path: "/todos";
-      fullPath: "/todos";
-      preLoaderRoute: typeof AppTodosRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/reports": {
-      id: "/_app/reports";
-      path: "/reports";
-      fullPath: "/reports";
-      preLoaderRoute: typeof AppReportsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/ai": {
-      id: "/_app/ai";
-      path: "/ai";
-      fullPath: "/ai";
-      preLoaderRoute: typeof AppAiRouteImport;
-      parentRoute: typeof AppRoute;
-    };
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tracker': {
+      id: '/_app/tracker'
+      path: '/tracker'
+      fullPath: '/tracker'
+      preLoaderRoute: typeof AppTrackerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/todos': {
+      id: '/_app/todos'
+      path: '/todos'
+      fullPath: '/todos'
+      preLoaderRoute: typeof AppTodosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai': {
+      id: '/_app/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AppAiRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
-  AppAiRoute: typeof AppAiRoute;
-  AppReportsRoute: typeof AppReportsRoute;
-  AppTodosRoute: typeof AppTodosRoute;
-  AppTrackerRoute: typeof AppTrackerRoute;
-  AppIndexRoute: typeof AppIndexRoute;
+  AppAiRoute: typeof AppAiRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppTodosRoute: typeof AppTodosRoute
+  AppTrackerRoute: typeof AppTrackerRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -185,15 +192,15 @@ const AppRouteChildren: AppRouteChildren = {
   AppTodosRoute: AppTodosRoute,
   AppTrackerRoute: AppTrackerRoute,
   AppIndexRoute: AppIndexRoute,
-};
+}
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   SuccessRoute: SuccessRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

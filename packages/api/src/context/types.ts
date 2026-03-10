@@ -9,10 +9,14 @@ export type SessionUser = {
 } & Record<string, unknown>;
 
 export type SessionData = {
-  session: Record<string, unknown>;
+  session: {
+    activeOrganizationId?: string | null;
+  } & Record<string, unknown>;
   user: SessionUser;
 } | null;
 
 export type TrpcContext = {
   session: SessionData;
+  /** Raw session token cookie value – used for server-side Better Auth API calls */
+  sessionToken?: string | null;
 };

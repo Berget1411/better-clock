@@ -36,15 +36,22 @@ function GitHubIcon() {
   );
 }
 
-export default function OAuthButtons() {
+export default function OAuthButtons({ invitationId }: { invitationId?: string }) {
   const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(null);
 
   async function handleOAuth(provider: "google" | "github") {
     setLoadingProvider(provider);
+
+    // If there's a pending invitation, send the user back to the accept page
+    // after the OAuth round-trip so the invitation is accepted while signed in.
+    const callbackPath = invitationId
+      ? `/accept-invitation/${invitationId}`
+      : AUTH_REDIRECT.afterSignIn;
+
     await authClient.signIn.social(
       {
         provider,
-        callbackURL: window.location.origin + AUTH_REDIRECT.afterSignIn,
+        callbackURL: window.location.origin + callbackPath,
       },
       {
         onError: (error) => {

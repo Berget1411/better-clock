@@ -34,6 +34,8 @@ export const server = await Worker("server", {
     GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET!,
     GITHUB_CLIENT_ID: alchemy.env.GITHUB_CLIENT_ID!,
     GITHUB_CLIENT_SECRET: alchemy.secret.env.GITHUB_CLIENT_SECRET!,
+    GMAIL_USER: alchemy.env.GMAIL_USER!,
+    GMAIL_APP_PASSWORD: alchemy.secret.env.GMAIL_APP_PASSWORD!,
   },
   dev: {
     port: 3002,

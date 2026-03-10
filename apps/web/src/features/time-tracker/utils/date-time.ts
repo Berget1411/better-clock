@@ -69,6 +69,7 @@ export function getDefaultManualValues() {
   } else {
     end.setHours(nextHour, 0, 0, 0);
   }
+  return {
     startTime: toLocalTimeInputValue(start),
     endTime: toLocalTimeInputValue(end),
     projectId: null as number | null,

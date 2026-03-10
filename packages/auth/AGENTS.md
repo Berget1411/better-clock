@@ -11,6 +11,16 @@
 - Put provider or billing helpers in `src/lib/*`.
 - Keep exports minimal and intentional.
 
+## Organisation Plugin
+
+- The `organization()` plugin is registered in `src/index.ts`.
+- Invitation emails are sent via `src/lib/email.ts` (Nodemailer + Gmail).
+- Invitation link format: `${CORS_ORIGIN}/accept-invitation/${id}`.
+- Roles: `owner`, `admin`, `member`. Creator is always `owner`.
+- Invitations expire after 7 days (`invitationExpiresIn: 60 * 60 * 24 * 7`).
+- The `session` table carries `activeOrganizationId` (added by the plugin).
+- Do not call org APIs directly here — use `auth.api.*` with a session-token header from `packages/api`.
+
 ## Best Practices
 
 - Reuse shared env values from `@open-learn/env`.

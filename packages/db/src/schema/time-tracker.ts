@@ -11,12 +11,15 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-import { user } from "./auth";
+import { organization, user } from "./auth";
 
 export const trackerProject = pgTable(
   "tracker_project",
   {
     id: serial("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -27,13 +30,19 @@ export const trackerProject = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("tracker_project_user_id_idx").on(table.userId)],
+  (table) => [
+    index("tracker_project_org_id_idx").on(table.organizationId),
+    index("tracker_project_user_id_idx").on(table.userId),
+  ],
 );
 
 export const trackerTag = pgTable(
   "tracker_tag",
   {
     id: serial("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -44,13 +53,19 @@ export const trackerTag = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("tracker_tag_user_id_idx").on(table.userId)],
+  (table) => [
+    index("tracker_tag_org_id_idx").on(table.organizationId),
+    index("tracker_tag_user_id_idx").on(table.userId),
+  ],
 );
 
 export const timeEntry = pgTable(
   "time_entry",
   {
     id: serial("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -66,11 +81,12 @@ export const timeEntry = pgTable(
       .notNull(),
   },
   (table) => [
+    index("time_entry_org_id_idx").on(table.organizationId),
     index("time_entry_user_id_idx").on(table.userId),
     index("time_entry_project_id_idx").on(table.projectId),
     index("time_entry_start_at_idx").on(table.startAt),
-    uniqueIndex("time_entry_active_user_idx")
-      .on(table.userId)
+    uniqueIndex("time_entry_active_org_user_idx")
+      .on(table.organizationId, table.userId)
       .where(sql`${table.endAt} is null`),
   ],
 );

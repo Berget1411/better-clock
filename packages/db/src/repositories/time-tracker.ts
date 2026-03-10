@@ -85,31 +85,33 @@ function normalizeName(name: string) {
 }
 
 export const timeTrackerRepository = {
-  async getProjects(userId: string) {
+  async getProjects(organizationId: string) {
     return db
       .select({ id: trackerProject.id, name: trackerProject.name })
       .from(trackerProject)
-      .where(eq(trackerProject.userId, userId))
+      .where(eq(trackerProject.organizationId, organizationId))
       .orderBy(trackerProject.name);
   },
 
-  async getProjectById(userId: string, projectId: number) {
+  async getProjectById(organizationId: string, projectId: number) {
     const [project] = await db
       .select({ id: trackerProject.id, name: trackerProject.name })
       .from(trackerProject)
-      .where(and(eq(trackerProject.userId, userId), eq(trackerProject.id, projectId)))
+      .where(
+        and(eq(trackerProject.organizationId, organizationId), eq(trackerProject.id, projectId)),
+      )
       .limit(1);
 
     return project ?? null;
   },
 
-  async findProjectByNormalizedName(userId: string, name: string) {
+  async findProjectByNormalizedName(organizationId: string, name: string) {
     const [project] = await db
       .select({ id: trackerProject.id, name: trackerProject.name })
       .from(trackerProject)
       .where(
         and(
-          eq(trackerProject.userId, userId),
+          eq(trackerProject.organizationId, organizationId),
           sql`lower(${trackerProject.name}) = ${normalizeName(name)}`,
         ),
       )
@@ -118,24 +120,24 @@ export const timeTrackerRepository = {
     return project ?? null;
   },
 
-  async createProject(userId: string, name: string) {
+  async createProject(organizationId: string, userId: string, name: string) {
     const [project] = await db
       .insert(trackerProject)
-      .values({ userId, name: name.trim() })
+      .values({ organizationId, userId, name: name.trim() })
       .returning({ id: trackerProject.id, name: trackerProject.name });
 
     return project;
   },
 
-  async getTags(userId: string) {
+  async getTags(organizationId: string) {
     return db
       .select({ id: trackerTag.id, name: trackerTag.name })
       .from(trackerTag)
-      .where(eq(trackerTag.userId, userId))
+      .where(eq(trackerTag.organizationId, organizationId))
       .orderBy(trackerTag.name);
   },
 
-  async getTagsByIds(userId: string, tagIds: number[]) {
+  async getTagsByIds(organizationId: string, tagIds: number[]) {
     if (!tagIds.length) {
       return [];
     }
@@ -143,52 +145,34 @@ export const timeTrackerRepository = {
     return db
       .select({ id: trackerTag.id, name: trackerTag.name })
       .from(trackerTag)
-      .where(and(eq(trackerTag.userId, userId), inArray(trackerTag.id, tagIds)));
+      .where(and(eq(trackerTag.organizationId, organizationId), inArray(trackerTag.id, tagIds)));
   },
 
-  async findTagByNormalizedName(userId: string, name: string) {
+  async findTagByNormalizedName(organizationId: string, name: string) {
     const [tag] = await db
       .select({ id: trackerTag.id, name: trackerTag.name })
       .from(trackerTag)
       .where(
-        and(eq(trackerTag.userId, userId), sql`lower(${trackerTag.name}) = ${normalizeName(name)}`),
+        and(
+          eq(trackerTag.organizationId, organizationId),
+          sql`lower(${trackerTag.name}) = ${normalizeName(name)}`,
+        ),
       )
       .limit(1);
 
     return tag ?? null;
   },
 
-  async createTag(userId: string, name: string) {
+  async createTag(organizationId: string, userId: string, name: string) {
     const [tag] = await db
       .insert(trackerTag)
-      .values({ userId, name: name.trim() })
+      .values({ organizationId, userId, name: name.trim() })
       .returning({ id: trackerTag.id, name: trackerTag.name });
 
     return tag;
   },
 
-  async getActiveEntry(userId: string) {
-    const rows = await db
-      .select({
-        id: timeEntry.id,
-        description: timeEntry.description,
-        isBillable: timeEntry.isBillable,
-        startAt: timeEntry.startAt,
-        endAt: timeEntry.endAt,
-        projectId: trackerProject.id,
-        projectName: trackerProject.name,
-      })
-      .from(timeEntry)
-      .leftJoin(trackerProject, eq(timeEntry.projectId, trackerProject.id))
-      .where(and(eq(timeEntry.userId, userId), isNull(timeEntry.endAt)))
-      .limit(1);
-
-    const [entry] = await hydrateEntries(rows);
-
-    return entry ?? null;
-  },
-
-  async getEntriesInRange(userId: string, from: Date, to: Date) {
+  async getActiveEntry(organizationId: string, userId: string) {
     const rows = await db
       .select({
         id: timeEntry.id,
@@ -203,6 +187,34 @@ export const timeTrackerRepository = {
       .leftJoin(trackerProject, eq(timeEntry.projectId, trackerProject.id))
       .where(
         and(
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNull(timeEntry.endAt),
+        ),
+      )
+      .limit(1);
+
+    const [entry] = await hydrateEntries(rows);
+
+    return entry ?? null;
+  },
+
+  async getEntriesInRange(organizationId: string, userId: string, from: Date, to: Date) {
+    const rows = await db
+      .select({
+        id: timeEntry.id,
+        description: timeEntry.description,
+        isBillable: timeEntry.isBillable,
+        startAt: timeEntry.startAt,
+        endAt: timeEntry.endAt,
+        projectId: trackerProject.id,
+        projectName: trackerProject.name,
+      })
+      .from(timeEntry)
+      .leftJoin(trackerProject, eq(timeEntry.projectId, trackerProject.id))
+      .where(
+        and(
+          eq(timeEntry.organizationId, organizationId),
           eq(timeEntry.userId, userId),
           isNotNull(timeEntry.endAt),
           gte(timeEntry.startAt, from),
@@ -215,6 +227,7 @@ export const timeTrackerRepository = {
   },
 
   async startTimer(
+    organizationId: string,
     userId: string,
     input: { description: string; projectId: number | null; tagIds: number[]; isBillable: boolean },
     startedAt: Date,
@@ -222,11 +235,18 @@ export const timeTrackerRepository = {
     await db
       .update(timeEntry)
       .set({ endAt: startedAt })
-      .where(and(eq(timeEntry.userId, userId), isNull(timeEntry.endAt)));
+      .where(
+        and(
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNull(timeEntry.endAt),
+        ),
+      );
 
     const [createdEntry] = await db
       .insert(timeEntry)
       .values({
+        organizationId,
         userId,
         description: input.description,
         projectId: input.projectId,
@@ -245,6 +265,7 @@ export const timeTrackerRepository = {
   },
 
   async updateActiveTimer(
+    organizationId: string,
     userId: string,
     input: {
       entryId: number;
@@ -262,7 +283,12 @@ export const timeTrackerRepository = {
         isBillable: input.isBillable,
       })
       .where(
-        and(eq(timeEntry.id, input.entryId), eq(timeEntry.userId, userId), isNull(timeEntry.endAt)),
+        and(
+          eq(timeEntry.id, input.entryId),
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNull(timeEntry.endAt),
+        ),
       )
       .returning({ id: timeEntry.id });
 
@@ -275,26 +301,41 @@ export const timeTrackerRepository = {
     return updatedEntry;
   },
 
-  async stopTimer(userId: string, entryId: number, stoppedAt: Date) {
+  async stopTimer(organizationId: string, userId: string, entryId: number, stoppedAt: Date) {
     const [entry] = await db
       .update(timeEntry)
       .set({ endAt: stoppedAt })
-      .where(and(eq(timeEntry.id, entryId), eq(timeEntry.userId, userId), isNull(timeEntry.endAt)))
+      .where(
+        and(
+          eq(timeEntry.id, entryId),
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNull(timeEntry.endAt),
+        ),
+      )
       .returning({ id: timeEntry.id });
 
     return entry ?? null;
   },
 
-  async discardTimer(userId: string, entryId: number) {
+  async discardTimer(organizationId: string, userId: string, entryId: number) {
     const [entry] = await db
       .delete(timeEntry)
-      .where(and(eq(timeEntry.id, entryId), eq(timeEntry.userId, userId), isNull(timeEntry.endAt)))
+      .where(
+        and(
+          eq(timeEntry.id, entryId),
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNull(timeEntry.endAt),
+        ),
+      )
       .returning({ id: timeEntry.id });
 
     return entry ?? null;
   },
 
   async createManualEntry(
+    organizationId: string,
     userId: string,
     input: {
       description: string;
@@ -308,6 +349,7 @@ export const timeTrackerRepository = {
     const [createdEntry] = await db
       .insert(timeEntry)
       .values({
+        organizationId,
         userId,
         description: input.description,
         projectId: input.projectId,
@@ -327,6 +369,7 @@ export const timeTrackerRepository = {
   },
 
   async updateEntry(
+    organizationId: string,
     userId: string,
     input: {
       entryId: number;
@@ -350,6 +393,7 @@ export const timeTrackerRepository = {
       .where(
         and(
           eq(timeEntry.id, input.entryId),
+          eq(timeEntry.organizationId, organizationId),
           eq(timeEntry.userId, userId),
           isNotNull(timeEntry.endAt),
         ),
@@ -365,11 +409,16 @@ export const timeTrackerRepository = {
     return updatedEntry;
   },
 
-  async deleteEntry(userId: string, entryId: number) {
+  async deleteEntry(organizationId: string, userId: string, entryId: number) {
     const [entry] = await db
       .delete(timeEntry)
       .where(
-        and(eq(timeEntry.id, entryId), eq(timeEntry.userId, userId), isNotNull(timeEntry.endAt)),
+        and(
+          eq(timeEntry.id, entryId),
+          eq(timeEntry.organizationId, organizationId),
+          eq(timeEntry.userId, userId),
+          isNotNull(timeEntry.endAt),
+        ),
       )
       .returning({ id: timeEntry.id });
 

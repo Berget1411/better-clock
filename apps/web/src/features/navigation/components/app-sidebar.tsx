@@ -7,6 +7,7 @@ import {
   TagIcon,
   BarChartIcon,
   CalendarIcon,
+  UsersIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -20,21 +21,6 @@ import { TeamSwitcher } from "./team-switcher";
 import NavMain from "./nav-main";
 import NavUser from "./nav-user";
 import NavManage from "./nav-manage";
-
-const teams = [
-  {
-    name: "Acme Inc.",
-    plan: "Pro",
-  },
-  {
-    name: "Globex Corp.",
-    plan: "Free",
-  },
-  {
-    name: "Wonka Industries",
-    plan: "Free",
-  },
-];
 
 const navMainItems = [
   {
@@ -77,6 +63,12 @@ const navManageItems = [
     icon: FolderIcon,
   },
   {
+    title: "Teams",
+    subtitle: "Manage your teams",
+    to: "/teams",
+    icon: UsersIcon,
+  },
+  {
     title: "Clients",
     subtitle: "AI experiments",
     to: "/ai",
@@ -95,7 +87,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <TeamSwitcher teams={teams} />
+          <TeamSwitcher />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

@@ -58,11 +58,15 @@ function mapEntry(entry: {
   };
 }
 
-async function validateProjectAndTags(userId: string, projectId: number | null, tagIds: number[]) {
+async function validateProjectAndTags(
+  organizationId: string,
+  projectId: number | null,
+  tagIds: number[],
+) {
   const uniqueTagIds = [...new Set(tagIds)];
 
   if (projectId !== null) {
-    const project = await timeTrackerRepository.getProjectById(userId, projectId);
+    const project = await timeTrackerRepository.getProjectById(organizationId, projectId);
 
     if (!project) {
       throw new TRPCError({
@@ -73,7 +77,7 @@ async function validateProjectAndTags(userId: string, projectId: number | null, 
   }
 
   if (uniqueTagIds.length) {
-    const tags = await timeTrackerRepository.getTagsByIds(userId, uniqueTagIds);
+    const tags = await timeTrackerRepository.getTagsByIds(organizationId, uniqueTagIds);
 
     if (tags.length !== uniqueTagIds.length) {
       throw new TRPCError({
@@ -91,7 +95,11 @@ function normalizeName(name: string) {
 }
 
 export const timeTrackerService = {
-  async overview(userId: string, input: OverviewInput): Promise<TrackerOverview> {
+  async overview(
+    organizationId: string,
+    userId: string,
+    input: OverviewInput,
+  ): Promise<TrackerOverview> {
     const from = parseDate(input.from, "from");
     const to = parseDate(input.to, "to");
 
@@ -103,10 +111,10 @@ export const timeTrackerService = {
     }
 
     const [activeEntry, entries, projects, tags] = await Promise.all([
-      timeTrackerRepository.getActiveEntry(userId),
-      timeTrackerRepository.getEntriesInRange(userId, from, to),
-      timeTrackerRepository.getProjects(userId),
-      timeTrackerRepository.getTags(userId),
+      timeTrackerRepository.getActiveEntry(organizationId, userId),
+      timeTrackerRepository.getEntriesInRange(organizationId, userId, from, to),
+      timeTrackerRepository.getProjects(organizationId),
+      timeTrackerRepository.getTags(organizationId),
     ]);
 
     return {
@@ -117,10 +125,11 @@ export const timeTrackerService = {
     };
   },
 
-  async startTimer(userId: string, input: StartTimerInput) {
-    const tagIds = await validateProjectAndTags(userId, input.projectId, input.tagIds);
+  async startTimer(organizationId: string, userId: string, input: StartTimerInput) {
+    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
 
     return timeTrackerRepository.startTimer(
+      organizationId,
       userId,
       {
         description: input.description.trim(),
@@ -132,9 +141,9 @@ export const timeTrackerService = {
     );
   },
 
-  async updateActiveTimer(userId: string, input: UpdateActiveTimerInput) {
-    const tagIds = await validateProjectAndTags(userId, input.projectId, input.tagIds);
-    const updatedEntry = await timeTrackerRepository.updateActiveTimer(userId, {
+  async updateActiveTimer(organizationId: string, userId: string, input: UpdateActiveTimerInput) {
+    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
+    const updatedEntry = await timeTrackerRepository.updateActiveTimer(organizationId, userId, {
       entryId: input.entryId,
       description: input.description.trim(),
       projectId: input.projectId,
@@ -152,8 +161,13 @@ export const timeTrackerService = {
     return updatedEntry;
   },
 
-  async stopTimer(userId: string, input: StopTimerInput) {
-    const stoppedEntry = await timeTrackerRepository.stopTimer(userId, input.entryId, new Date());
+  async stopTimer(organizationId: string, userId: string, input: StopTimerInput) {
+    const stoppedEntry = await timeTrackerRepository.stopTimer(
+      organizationId,
+      userId,
+      input.entryId,
+      new Date(),
+    );
 
     if (!stoppedEntry) {
       throw new TRPCError({
@@ -165,8 +179,12 @@ export const timeTrackerService = {
     return stoppedEntry;
   },
 
-  async discardTimer(userId: string, input: DiscardTimerInput) {
-    const deletedEntry = await timeTrackerRepository.discardTimer(userId, input.entryId);
+  async discardTimer(organizationId: string, userId: string, input: DiscardTimerInput) {
+    const deletedEntry = await timeTrackerRepository.discardTimer(
+      organizationId,
+      userId,
+      input.entryId,
+    );
 
     if (!deletedEntry) {
       throw new TRPCError({
@@ -178,14 +196,14 @@ export const timeTrackerService = {
     return deletedEntry;
   },
 
-  async createManualEntry(userId: string, input: CreateManualEntryInput) {
+  async createManualEntry(organizationId: string, userId: string, input: CreateManualEntryInput) {
     const startAt = parseDate(input.startAt, "startAt");
     const endAt = parseDate(input.endAt, "endAt");
-    const tagIds = await validateProjectAndTags(userId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
 
     ensureChronologicalOrder(startAt, endAt);
 
-    return timeTrackerRepository.createManualEntry(userId, {
+    return timeTrackerRepository.createManualEntry(organizationId, userId, {
       description: input.description.trim(),
       projectId: input.projectId,
       tagIds,
@@ -195,14 +213,14 @@ export const timeTrackerService = {
     });
   },
 
-  async updateEntry(userId: string, input: UpdateEntryInput) {
+  async updateEntry(organizationId: string, userId: string, input: UpdateEntryInput) {
     const startAt = parseDate(input.startAt, "startAt");
     const endAt = parseDate(input.endAt, "endAt");
-    const tagIds = await validateProjectAndTags(userId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
 
     ensureChronologicalOrder(startAt, endAt);
 
-    const updatedEntry = await timeTrackerRepository.updateEntry(userId, {
+    const updatedEntry = await timeTrackerRepository.updateEntry(organizationId, userId, {
       entryId: input.entryId,
       description: input.description.trim(),
       projectId: input.projectId,
@@ -222,8 +240,12 @@ export const timeTrackerService = {
     return updatedEntry;
   },
 
-  async deleteEntry(userId: string, input: DeleteEntryInput) {
-    const deletedEntry = await timeTrackerRepository.deleteEntry(userId, input.entryId);
+  async deleteEntry(organizationId: string, userId: string, input: DeleteEntryInput) {
+    const deletedEntry = await timeTrackerRepository.deleteEntry(
+      organizationId,
+      userId,
+      input.entryId,
+    );
 
     if (!deletedEntry) {
       throw new TRPCError({
@@ -235,9 +257,12 @@ export const timeTrackerService = {
     return deletedEntry;
   },
 
-  async createProject(userId: string, input: CreateProjectInput) {
+  async createProject(organizationId: string, userId: string, input: CreateProjectInput) {
     const name = normalizeName(input.name);
-    const existingProject = await timeTrackerRepository.findProjectByNormalizedName(userId, name);
+    const existingProject = await timeTrackerRepository.findProjectByNormalizedName(
+      organizationId,
+      name,
+    );
 
     if (existingProject) {
       throw new TRPCError({
@@ -246,12 +271,12 @@ export const timeTrackerService = {
       });
     }
 
-    return timeTrackerRepository.createProject(userId, name);
+    return timeTrackerRepository.createProject(organizationId, userId, name);
   },
 
-  async createTag(userId: string, input: CreateTagInput) {
+  async createTag(organizationId: string, userId: string, input: CreateTagInput) {
     const name = normalizeName(input.name);
-    const existingTag = await timeTrackerRepository.findTagByNormalizedName(userId, name);
+    const existingTag = await timeTrackerRepository.findTagByNormalizedName(organizationId, name);
 
     if (existingTag) {
       throw new TRPCError({
@@ -260,6 +285,6 @@ export const timeTrackerService = {
       });
     }
 
-    return timeTrackerRepository.createTag(userId, name);
+    return timeTrackerRepository.createTag(organizationId, userId, name);
   },
 };

@@ -19,7 +19,13 @@ import { AUTH_COPY, AUTH_REDIRECT } from "../constants";
 import { authClient } from "@/lib/auth-client";
 import OAuthButtons from "./oauth-buttons";
 
-export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
+export default function SignInForm({
+  onSwitchToSignUp,
+  invitationId,
+}: {
+  onSwitchToSignUp: () => void;
+  invitationId?: string;
+}) {
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
@@ -32,9 +38,18 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
       await authClient.signIn.email(
         { email: value.email, password: value.password },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
+            if (invitationId) {
+              try {
+                await authClient.organization.acceptInvitation({ invitationId });
+                toast.success("Sign in successful — you've joined the organisation");
+              } catch {
+                // Best-effort; navigate regardless
+              }
+            } else {
+              toast.success("Sign in successful");
+            }
             navigate({ to: AUTH_REDIRECT.afterSignIn });
-            toast.success("Sign in successful");
           },
           onError: (error) => {
             toast.error(error.error.message ?? error.error.statusText);
@@ -58,7 +73,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">{AUTH_COPY.signIn.title}</CardTitle>
           <CardDescription>Continue with</CardDescription>
-          <OAuthButtons />
+          <OAuthButtons invitationId={invitationId} />
         </CardHeader>
 
         <CardContent>

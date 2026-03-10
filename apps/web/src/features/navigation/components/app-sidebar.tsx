@@ -6,6 +6,7 @@ import {
   HomeIcon,
   LifeBuoyIcon,
   ListTodoIcon,
+  Clock,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -86,13 +87,10 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
             <SidebarMenuButton asChild size="lg" tooltip="open-learn">
               <Link to="/">
                 <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-none bg-sidebar-primary text-sidebar-primary-foreground">
-                  <CommandIcon />
+                  <Clock />
                 </div>
                 <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">open-learn</span>
-                  <span className="truncate text-xs text-sidebar-foreground/70">
-                    Learn made easy
-                  </span>
+                  <span className="truncate font-medium">Open Clock</span>
                 </div>
               </Link>
             </SidebarMenuButton>

@@ -44,7 +44,7 @@ export default function OAuthButtons() {
     await authClient.signIn.social(
       {
         provider,
-        callbackURL: AUTH_REDIRECT.afterSignIn,
+        callbackURL: window.location.origin + AUTH_REDIRECT.afterSignIn,
       },
       {
         onError: (error) => {

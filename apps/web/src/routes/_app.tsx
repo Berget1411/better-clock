@@ -13,6 +13,7 @@ const titles: Partial<Record<AppRoutePath, string>> = {
   "/": "Dashboard",
   "/ai": "AI Chat",
   "/todos": "Todos",
+  "/tracker": "Time Tracker",
 };
 
 export const Route = createFileRoute("/_app")({

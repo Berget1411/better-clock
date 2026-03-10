@@ -13,7 +13,9 @@ import { Route as SuccessRouteImport } from './routes/success'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppTrackerRouteImport } from './routes/_app.tracker'
 import { Route as AppTodosRouteImport } from './routes/_app.todos'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppAiRouteImport } from './routes/_app.ai'
 
 const SuccessRoute = SuccessRouteImport.update({
@@ -35,9 +37,19 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTrackerRoute = AppTrackerRouteImport.update({
+  id: '/tracker',
+  path: '/tracker',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppTodosRoute = AppTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAiRoute = AppAiRouteImport.update({
@@ -51,13 +63,17 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/ai': typeof AppAiRoute
+  '/reports': typeof AppReportsRoute
   '/todos': typeof AppTodosRoute
+  '/tracker': typeof AppTrackerRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/ai': typeof AppAiRoute
+  '/reports': typeof AppReportsRoute
   '/todos': typeof AppTodosRoute
+  '/tracker': typeof AppTrackerRoute
   '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -66,21 +82,32 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/_app/ai': typeof AppAiRoute
+  '/_app/reports': typeof AppReportsRoute
   '/_app/todos': typeof AppTodosRoute
+  '/_app/tracker': typeof AppTrackerRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/success' | '/ai' | '/todos'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/success'
+    | '/ai'
+    | '/reports'
+    | '/todos'
+    | '/tracker'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/success' | '/ai' | '/todos' | '/'
+  to: '/login' | '/success' | '/ai' | '/reports' | '/todos' | '/tracker' | '/'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/success'
     | '/_app/ai'
+    | '/_app/reports'
     | '/_app/todos'
+    | '/_app/tracker'
     | '/_app/'
   fileRoutesById: FileRoutesById
 }
@@ -120,11 +147,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tracker': {
+      id: '/_app/tracker'
+      path: '/tracker'
+      fullPath: '/tracker'
+      preLoaderRoute: typeof AppTrackerRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/todos': {
       id: '/_app/todos'
       path: '/todos'
       fullPath: '/todos'
       preLoaderRoute: typeof AppTodosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/ai': {
@@ -139,13 +180,17 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
+  AppReportsRoute: typeof AppReportsRoute
   AppTodosRoute: typeof AppTodosRoute
+  AppTrackerRoute: typeof AppTrackerRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
+  AppReportsRoute: AppReportsRoute,
   AppTodosRoute: AppTodosRoute,
+  AppTrackerRoute: AppTrackerRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

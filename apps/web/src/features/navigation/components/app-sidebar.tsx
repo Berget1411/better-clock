@@ -1,33 +1,61 @@
 import {
   BotIcon,
-  CommandIcon,
   FolderIcon,
   HomeIcon,
+  Clock3Icon,
   ListTodoIcon,
-  Clock,
   TagIcon,
+  BarChartIcon,
+  CalendarIcon,
 } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarRail,
 } from "@open-learn/ui/components/sidebar";
-
+import { TeamSwitcher } from "./team-switcher";
 import NavMain from "./nav-main";
 import NavUser from "./nav-user";
 import NavManage from "./nav-manage";
+
+const teams = [
+  {
+    name: "Acme Inc.",
+    plan: "Pro",
+  },
+  {
+    name: "Globex Corp.",
+    plan: "Free",
+  },
+  {
+    name: "Wonka Industries",
+    plan: "Free",
+  },
+];
 
 const navMainItems = [
   {
     title: "Dashboard",
     to: "/",
     icon: HomeIcon,
+  },
+  {
+    title: "Reports",
+    to: "/reports",
+    icon: BarChartIcon,
+  },
+  {
+    title: "Time Tracker",
+    to: "/tracker",
+    icon: Clock3Icon,
+  },
+  {
+    title: "Calendar",
+    to: "/calendar",
+    icon: CalendarIcon,
   },
   {
     title: "Todos",
@@ -42,11 +70,6 @@ const navMainItems = [
 ] as const;
 
 const navManageItems = [
-  {
-    title: "Organization",
-    to: "/",
-    icon: CommandIcon,
-  },
   {
     title: "Projects",
     subtitle: "Shipping list",
@@ -72,18 +95,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild size="lg" tooltip="open-learn">
-              <Link to="/">
-                <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-none bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Clock />
-                </div>
-                <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Open Clock</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <TeamSwitcher teams={teams} />
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>

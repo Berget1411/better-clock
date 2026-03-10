@@ -1,13 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import DashboardPage from "@/features/auth/pages/dashboard-page";
+import TrackerDashboardPage from "@/features/time-tracker/pages/tracker-dashboard-page";
 
 export const Route = createFileRoute("/_app/")({
-  component: DashboardRoute,
+  component: TrackerDashboardPage,
 });
-
-function DashboardRoute() {
-  const { session, customerState } = Route.useRouteContext();
-
-  return <DashboardPage session={session} customerState={customerState} />;
-}

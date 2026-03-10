@@ -1,6 +1,5 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
 import { ActivityIcon, CalendarRangeIcon } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { Badge } from "@open-learn/ui/components/badge";
 import {
@@ -11,12 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@open-learn/ui/components/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@open-learn/ui/components/chart";
 import {
   Select,
   SelectContent,
@@ -33,29 +26,17 @@ import {
   buildTrackerDashboardMetrics,
   formatCompactDuration,
   formatMetricDuration,
-  formatProjectShare,
   getDashboardRange,
   type DashboardRangeKey,
 } from "../utils/dashboard";
 import { getEntryDescriptionLabel, getElapsedSeconds } from "../utils/date-time";
 
-const dailyChartConfig = {
-  totalHours: {
-    label: "Tracked hours",
-    color: "hsl(174 84% 32%)",
-  },
-  billableHours: {
-    label: "Billable hours",
-    color: "hsl(200 78% 46%)",
-  },
-} satisfies ChartConfig;
-
-const projectChartConfig = {
-  hours: {
-    label: "Hours",
-    color: "hsl(174 84% 32%)",
-  },
-} satisfies ChartConfig;
+const DashboardBarChart = lazy(() =>
+  import("../components/dashboard-charts").then((m) => ({ default: m.DashboardBarChart })),
+);
+const DashboardPieChart = lazy(() =>
+  import("../components/dashboard-charts").then((m) => ({ default: m.DashboardPieChart })),
+);
 
 type BreakdownMode = "project" | "billability";
 
@@ -180,7 +161,7 @@ export default function TrackerDashboardPage() {
                   <Skeleton className="h-[220px] w-[220px] justify-self-center" />
                   <div className="space-y-3">
                     {Array.from({ length: 3 }, (_, index) => (
-                      <Skeleton key={index} className="h-12 w-full" />
+                      <Skeleton key={`skeleton-row-${index}`} className="h-12 w-full" />
                     ))}
                   </div>
                 </div>
@@ -188,38 +169,9 @@ export default function TrackerDashboardPage() {
             ) : hasEntries ? (
               <>
                 <div className="border-b border-border/70 px-3 py-3 md:px-4">
-                  <ChartContainer config={dailyChartConfig} className="h-[300px] w-full">
-                    <BarChart data={metrics.daily} barGap={10}>
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="label"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        minTickGap={18}
-                      />
-                      <YAxis
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        width={42}
-                        tickFormatter={(value) => `${value}h`}
-                      />
-                      <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                      <Bar
-                        dataKey="totalHours"
-                        fill="var(--color-totalHours)"
-                        maxBarSize={28}
-                        radius={[0, 0, 0, 0]}
-                      />
-                      <Bar
-                        dataKey="billableHours"
-                        fill="var(--color-billableHours)"
-                        maxBarSize={28}
-                        radius={[0, 0, 0, 0]}
-                      />
-                    </BarChart>
-                  </ChartContainer>
+                  <Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
+                    <DashboardBarChart daily={metrics.daily} />
+                  </Suspense>
                 </div>
 
                 <div className="border-t border-border/70 bg-muted/20 px-3 py-2 md:px-4">
@@ -229,54 +181,23 @@ export default function TrackerDashboardPage() {
                   <p className="mt-0.5 text-xs text-muted-foreground">{breakdownDescription}</p>
                 </div>
 
-                <div className="grid gap-5 px-3 py-4 md:px-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center">
-                  <div className="relative mx-auto flex w-full max-w-[220px] items-center justify-center">
-                    <ChartContainer
-                      config={projectChartConfig}
-                      className="aspect-square h-[220px] w-full"
-                    >
-                      <PieChart>
-                        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                        <Pie
-                          data={breakdownItems}
-                          dataKey="hours"
-                          nameKey="name"
-                          innerRadius={54}
-                          outerRadius={88}
-                          paddingAngle={2}
-                          strokeWidth={0}
-                        >
-                          {breakdownItems.map((item) => (
-                            <Cell key={item.name} fill={item.fill} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ChartContainer>
-                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-semibold">
-                        {formatMetricDuration(metrics.totalSeconds)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {breakdownItems.map((item) => (
-                      <div
-                        key={item.name}
-                        className="grid gap-2 sm:grid-cols-[minmax(0,220px)_auto_minmax(120px,1fr)_auto] sm:items-center"
-                      >
-                        <div className="truncate text-sm font-medium">{item.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatMetricDuration(item.seconds)}
-                        </div>
-                        <ShareBar percentage={item.percentage} color={item.fill} />
-                        <div className="text-right text-sm text-muted-foreground">
-                          {formatProjectShare(item.percentage)}
-                        </div>
+                <Suspense
+                  fallback={
+                    <div className="grid gap-5 px-3 py-4 md:px-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center">
+                      <Skeleton className="h-[220px] w-[220px] justify-self-center" />
+                      <div className="space-y-3">
+                        {Array.from({ length: 3 }, (_, i) => (
+                          <Skeleton key={`skeleton-pie-fallback-${i}`} className="h-12 w-full" />
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+                  }
+                >
+                  <DashboardPieChart
+                    breakdownItems={breakdownItems}
+                    totalSeconds={metrics.totalSeconds}
+                  />
+                </Suspense>
               </>
             ) : (
               <EmptyState
@@ -301,7 +222,7 @@ export default function TrackerDashboardPage() {
             {trackerOverview.isLoading ? (
               <div className="space-y-2 p-3">
                 {Array.from({ length: 8 }, (_, index) => (
-                  <Skeleton key={index} className="h-14 w-full" />
+                  <Skeleton key={`skeleton-activity-${index}`} className="h-14 w-full" />
                 ))}
               </div>
             ) : metrics.activities.length ? (
@@ -392,14 +313,6 @@ function SummaryCell({
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="truncate text-[2rem] leading-none font-medium tracking-tight">{value}</p>
       <p className="text-xs text-muted-foreground">{detail}</p>
-    </div>
-  );
-}
-
-function ShareBar({ percentage, color }: { percentage: number; color: string }) {
-  return (
-    <div className="h-3 w-full bg-muted">
-      <div className="h-full" style={{ width: `${percentage}%`, backgroundColor: color }} />
     </div>
   );
 }

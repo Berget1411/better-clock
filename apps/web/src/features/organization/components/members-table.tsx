@@ -112,7 +112,6 @@ function InviteModal({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-              autoFocus
             />
           </div>
           <div className="grid gap-2">

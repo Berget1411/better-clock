@@ -8,6 +8,8 @@ import {
   BarChartIcon,
   CalendarIcon,
   UsersIcon,
+  Building2Icon,
+  KanbanIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -44,6 +46,11 @@ const navMainItems = [
     icon: CalendarIcon,
   },
   {
+    title: "Kanban",
+    to: "/kanban",
+    icon: KanbanIcon,
+  },
+  {
     title: "Todos",
     to: "/todos",
     icon: ListTodoIcon,
@@ -58,8 +65,8 @@ const navMainItems = [
 const navManageItems = [
   {
     title: "Projects",
-    subtitle: "Shipping list",
-    to: "/todos",
+    subtitle: "Manage your projects",
+    to: "/projects",
     icon: FolderIcon,
   },
   {
@@ -70,14 +77,14 @@ const navManageItems = [
   },
   {
     title: "Clients",
-    subtitle: "AI experiments",
-    to: "/ai",
-    icon: BotIcon,
+    subtitle: "Manage your clients",
+    to: "/clients",
+    icon: Building2Icon,
   },
   {
     title: "Tags",
     subtitle: "Manage your tags",
-    to: "/ai",
+    to: "/tags",
     icon: TagIcon,
   },
 ] as const;

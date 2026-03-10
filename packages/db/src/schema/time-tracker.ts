@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  numeric,
   pgTable,
   primaryKey,
   serial,
@@ -12,6 +13,27 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { organization, user } from "./auth";
+
+// client must be declared before trackerProject so the FK reference resolves
+export const client = pgTable(
+  "client",
+  {
+    id: serial("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    address: text("address"),
+    currency: text("currency").notNull().default("USD"),
+    isArchived: boolean("is_archived").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("client_org_id_idx").on(table.organizationId)],
+);
 
 export const trackerProject = pgTable(
   "tracker_project",
@@ -24,6 +46,11 @@ export const trackerProject = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    clientId: integer("client_id").references(() => client.id, { onDelete: "set null" }),
+    color: text("color"),
+    hourlyRate: numeric("hourly_rate", { precision: 10, scale: 2 }),
+    isArchived: boolean("is_archived").notNull().default(false),
+    access: text("access").notNull().default("public"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -33,6 +60,7 @@ export const trackerProject = pgTable(
   (table) => [
     index("tracker_project_org_id_idx").on(table.organizationId),
     index("tracker_project_user_id_idx").on(table.userId),
+    index("tracker_project_client_id_idx").on(table.clientId),
   ],
 );
 

@@ -17,6 +17,7 @@ const titles: Record<string, string> = {
   "/": "Dashboard",
   "/ai": "AI Chat",
   "/reports": "Reports",
+  "/tags": "Tags",
   "/todos": "Todos",
   "/tracker": "Time Tracker",
 };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useReducer } from "react";
 import {
   ActivityIcon,
   CalendarRangeIcon,
@@ -11,7 +11,6 @@ import {
   PrinterIcon,
   Share2Icon,
 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
 import { Badge } from "@open-learn/ui/components/badge";
@@ -23,12 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@open-learn/ui/components/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@open-learn/ui/components/chart";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,23 +62,12 @@ import {
   type ReportPresetKey,
 } from "../utils/reports";
 
-const dailyChartConfig = {
-  totalHours: {
-    label: "Tracked hours",
-    color: "hsl(174 84% 32%)",
-  },
-  billableHours: {
-    label: "Billable hours",
-    color: "hsl(200 78% 46%)",
-  },
-} satisfies ChartConfig;
-
-const projectChartConfig = {
-  percentage: {
-    label: "Project share",
-    color: "hsl(174 84% 32%)",
-  },
-} satisfies ChartConfig;
+const ReportsBarChart = lazy(() =>
+  import("../components/reports-charts").then((m) => ({ default: m.ReportsBarChart })),
+);
+const ReportsPieChart = lazy(() =>
+  import("../components/reports-charts").then((m) => ({ default: m.ReportsPieChart })),
+);
 
 const billableOptions = [
   { value: "all", label: "Billability" },
@@ -101,14 +83,71 @@ function addDays(date: Date, days: number) {
   return result;
 }
 
+// ─── Reducer ──────────────────────────────────────────────────────────────────
+
+type BillableFilter = (typeof billableOptions)[number]["value"];
+
+interface FiltersState {
+  preset: ReportPresetKey;
+  fromInput: string;
+  toInput: string;
+  projectFilter: string;
+  billableFilter: BillableFilter;
+  searchValue: string;
+}
+
+type FiltersAction =
+  | { type: "SET_PRESET"; preset: ReportPresetKey; fromInput: string; toInput: string }
+  | { type: "SET_CUSTOM_FROM"; fromInput: string }
+  | { type: "SET_CUSTOM_TO"; toInput: string }
+  | { type: "SET_PROJECT_FILTER"; projectFilter: string }
+  | { type: "SET_BILLABLE_FILTER"; billableFilter: BillableFilter }
+  | { type: "SET_SEARCH"; searchValue: string }
+  | { type: "RESET_FILTERS" }
+  | { type: "SHIFT_RANGE"; fromInput: string; toInput: string };
+
+function filtersReducer(state: FiltersState, action: FiltersAction): FiltersState {
+  switch (action.type) {
+    case "SET_PRESET":
+      return {
+        ...state,
+        preset: action.preset,
+        fromInput: action.fromInput,
+        toInput: action.toInput,
+      };
+    case "SET_CUSTOM_FROM":
+      return { ...state, preset: "custom", fromInput: action.fromInput };
+    case "SET_CUSTOM_TO":
+      return { ...state, preset: "custom", toInput: action.toInput };
+    case "SET_PROJECT_FILTER":
+      return { ...state, projectFilter: action.projectFilter };
+    case "SET_BILLABLE_FILTER":
+      return { ...state, billableFilter: action.billableFilter };
+    case "SET_SEARCH":
+      return { ...state, searchValue: action.searchValue };
+    case "RESET_FILTERS":
+      return { ...state, projectFilter: "all", billableFilter: "all", searchValue: "" };
+    case "SHIFT_RANGE":
+      return { ...state, preset: "custom", fromInput: action.fromInput, toInput: action.toInput };
+    default:
+      return state;
+  }
+}
+
+const initialFiltersState: FiltersState = {
+  preset: "last-month",
+  fromInput: initialRange.fromInput,
+  toInput: initialRange.toInput,
+  projectFilter: "all",
+  billableFilter: "all",
+  searchValue: "",
+};
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function ReportsPage() {
-  const [preset, setPreset] = useState<ReportPresetKey>("last-month");
-  const [fromInput, setFromInput] = useState(initialRange.fromInput);
-  const [toInput, setToInput] = useState(initialRange.toInput);
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [billableFilter, setBillableFilter] =
-    useState<(typeof billableOptions)[number]["value"]>("all");
-  const [searchValue, setSearchValue] = useState("");
+  const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
+  const { preset, fromInput, toInput, projectFilter, billableFilter, searchValue } = filters;
 
   const resolvedRange = useMemo(() => resolveReportRange(fromInput, toInput), [fromInput, toInput]);
   const rangeLabel = useMemo(
@@ -159,25 +198,27 @@ export default function ReportsPage() {
 
   function handlePresetChange(value: string) {
     const nextPreset = value as ReportPresetKey;
-    setPreset(nextPreset);
 
     if (nextPreset === "custom") {
+      dispatch({ type: "SET_PRESET", preset: nextPreset, fromInput, toInput });
       return;
     }
 
     const nextRange = getReportPresetRange(nextPreset);
-    setFromInput(nextRange.fromInput);
-    setToInput(nextRange.toInput);
+    dispatch({
+      type: "SET_PRESET",
+      preset: nextPreset,
+      fromInput: nextRange.fromInput,
+      toInput: nextRange.toInput,
+    });
   }
 
   function handleCustomFromChange(value: string) {
-    setPreset("custom");
-    setFromInput(value);
+    dispatch({ type: "SET_CUSTOM_FROM", fromInput: value });
   }
 
   function handleCustomToChange(value: string) {
-    setPreset("custom");
-    setToInput(value);
+    dispatch({ type: "SET_CUSTOM_TO", toInput: value });
   }
 
   function shiftRange(direction: -1 | 1) {
@@ -192,9 +233,7 @@ export default function ReportsPage() {
       addDays(toDate, dayCount * direction),
     );
 
-    setPreset("custom");
-    setFromInput(nextRange.fromInput);
-    setToInput(nextRange.toInput);
+    dispatch({ type: "SHIFT_RANGE", fromInput: nextRange.fromInput, toInput: nextRange.toInput });
   }
 
   function handleExport(format: ReportExportFormat) {
@@ -234,9 +273,7 @@ export default function ReportsPage() {
   }
 
   function resetFilters() {
-    setProjectFilter("all");
-    setBillableFilter("all");
-    setSearchValue("");
+    dispatch({ type: "RESET_FILTERS" });
   }
 
   return (
@@ -361,7 +398,9 @@ export default function ReportsPage() {
           <div className="min-w-0 flex-1 basis-[180px] sm:basis-[160px]">
             <CompactSelect
               value={projectFilter}
-              onValueChange={setProjectFilter}
+              onValueChange={(value) =>
+                dispatch({ type: "SET_PROJECT_FILTER", projectFilter: value })
+              }
               ariaLabel="Filter by project"
             >
               <SelectItem value="all">Project</SelectItem>
@@ -377,7 +416,7 @@ export default function ReportsPage() {
             <CompactSelect
               value={billableFilter}
               onValueChange={(value) =>
-                setBillableFilter(value as (typeof billableOptions)[number]["value"])
+                dispatch({ type: "SET_BILLABLE_FILTER", billableFilter: value as BillableFilter })
               }
               ariaLabel="Filter by billability"
             >
@@ -392,7 +431,9 @@ export default function ReportsPage() {
           <div className="min-w-0 flex-[2_1_220px] basis-[220px]">
             <Input
               value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
+              onChange={(event) =>
+                dispatch({ type: "SET_SEARCH", searchValue: event.target.value })
+              }
               placeholder="Description or tag"
               className="h-9 rounded-none bg-background text-xs"
             />
@@ -456,32 +497,9 @@ export default function ReportsPage() {
           ) : hasEntries ? (
             <>
               <div className="border-b border-border/70 px-3 py-3">
-                <ChartContainer config={dailyChartConfig} className="h-[280px] w-full">
-                  <BarChart data={metrics.daily} barGap={8}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      minTickGap={16}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      width={40}
-                      tickFormatter={(value) => `${value}h`}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                    <Bar dataKey="totalHours" fill="var(--color-totalHours)" maxBarSize={24} />
-                    <Bar
-                      dataKey="billableHours"
-                      fill="var(--color-billableHours)"
-                      maxBarSize={24}
-                    />
-                  </BarChart>
-                </ChartContainer>
+                <Suspense fallback={<Skeleton className="h-[280px] w-full" />}>
+                  <ReportsBarChart daily={metrics.daily} />
+                </Suspense>
               </div>
 
               <div className="grid gap-0 2xl:grid-cols-[minmax(0,1fr)_360px]">
@@ -555,60 +573,12 @@ export default function ReportsPage() {
                     </p>
                   </div>
 
-                  <div className="grid gap-3 p-3">
-                    <div className="relative mx-auto flex w-full max-w-[210px] items-center justify-center">
-                      <ChartContainer
-                        config={projectChartConfig}
-                        className="aspect-square h-[210px] w-full"
-                      >
-                        <PieChart>
-                          <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-                          <Pie
-                            data={metrics.projects}
-                            dataKey="seconds"
-                            nameKey="name"
-                            innerRadius={54}
-                            outerRadius={84}
-                            paddingAngle={2}
-                            strokeWidth={0}
-                          >
-                            {metrics.projects.map((project) => (
-                              <Cell key={project.name} fill={project.fill} />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ChartContainer>
-                      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-lg font-semibold">
-                          {formatMetricDuration(metrics.totalSeconds)}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">total tracked</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      {metrics.projects.map((project) => (
-                        <div
-                          key={project.name}
-                          className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 text-xs"
-                        >
-                          <div className="flex min-w-0 items-center gap-2">
-                            <span
-                              className="size-2.5 shrink-0 rounded-full"
-                              style={{ backgroundColor: project.fill }}
-                            />
-                            <span className="truncate font-medium">{project.name}</span>
-                          </div>
-                          <span className="text-muted-foreground">
-                            {formatMetricDuration(project.seconds)}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {project.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <Suspense fallback={<Skeleton className="h-[360px] w-full" />}>
+                    <ReportsPieChart
+                      projects={metrics.projects}
+                      totalSeconds={metrics.totalSeconds}
+                    />
+                  </Suspense>
                 </section>
               </div>
             </>

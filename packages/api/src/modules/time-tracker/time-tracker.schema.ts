@@ -63,10 +63,68 @@ export const deleteEntryInputSchema = z.object({
 
 export const createProjectInputSchema = z.object({
   name: z.string().trim().min(1).max(80),
+  clientId: z.number().int().positive().nullable().optional(),
+  color: z.string().trim().max(20).nullable().optional(),
+  hourlyRate: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .nullable()
+    .optional(),
+  access: z.enum(["public", "private", "team"]).optional().default("public"),
+});
+
+export const listProjectsInputSchema = z.object({
+  showArchived: z.boolean().optional().default(false),
+  clientId: z.number().int().positive().nullable().optional(),
+  access: z.enum(["public", "private", "team"]).nullable().optional(),
+  hasBilling: z.boolean().nullable().optional(),
+});
+
+export const updateProjectInputSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().trim().min(1).max(80).optional(),
+  clientId: z.number().int().positive().nullable().optional(),
+  color: z.string().trim().max(20).nullable().optional(),
+  hourlyRate: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/)
+    .nullable()
+    .optional(),
+  isArchived: z.boolean().optional(),
+  access: z.enum(["public", "private", "team"]).optional(),
+});
+
+export const deleteProjectInputSchema = z.object({
+  id: z.number().int().positive(),
+});
+
+export const trackerProjectFullSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+  clientId: z.number().int().positive().nullable(),
+  clientName: z.string().nullable(),
+  clientCurrency: z.string().nullable(),
+  color: z.string().nullable(),
+  hourlyRate: z.string().nullable(),
+  isArchived: z.boolean(),
+  access: z.string(),
+  trackedSeconds: z.number(),
+  amount: z.number(),
 });
 
 export const createTagInputSchema = z.object({
   name: z.string().trim().min(1).max(80),
+});
+
+export const listTagsInputSchema = z.object({});
+
+export const updateTagInputSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().trim().min(1).max(80),
+});
+
+export const deleteTagInputSchema = z.object({
+  id: z.number().int().positive(),
 });
 
 export const trackerOverviewSchema = z.object({
@@ -77,6 +135,7 @@ export const trackerOverviewSchema = z.object({
 });
 
 export type TrackerProject = z.infer<typeof trackerProjectSchema>;
+export type TrackerProjectFull = z.infer<typeof trackerProjectFullSchema>;
 export type TrackerTag = z.infer<typeof trackerTagSchema>;
 export type TrackerEntry = z.infer<typeof trackerEntrySchema>;
 export type TrackerOverview = z.infer<typeof trackerOverviewSchema>;
@@ -90,4 +149,10 @@ export type CreateManualEntryInput = z.infer<typeof createManualEntryInputSchema
 export type UpdateEntryInput = z.infer<typeof updateEntryInputSchema>;
 export type DeleteEntryInput = z.infer<typeof deleteEntryInputSchema>;
 export type CreateProjectInput = z.infer<typeof createProjectInputSchema>;
+export type ListProjectsInput = z.infer<typeof listProjectsInputSchema>;
+export type UpdateProjectInput = z.infer<typeof updateProjectInputSchema>;
+export type DeleteProjectInput = z.infer<typeof deleteProjectInputSchema>;
 export type CreateTagInput = z.infer<typeof createTagInputSchema>;
+export type ListTagsInput = z.infer<typeof listTagsInputSchema>;
+export type UpdateTagInput = z.infer<typeof updateTagInputSchema>;
+export type DeleteTagInput = z.infer<typeof deleteTagInputSchema>;

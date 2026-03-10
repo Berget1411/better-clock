@@ -1,7 +1,13 @@
 import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
 
 import { db } from "../client";
-import { trackerProject, trackerTag, timeEntry, timeEntryTag } from "../schema/time-tracker";
+import {
+  client,
+  trackerProject,
+  trackerTag,
+  timeEntry,
+  timeEntryTag,
+} from "../schema/time-tracker";
 
 type EntryRow = {
   id: number;
@@ -120,10 +126,28 @@ export const timeTrackerRepository = {
     return project ?? null;
   },
 
-  async createProject(organizationId: string, userId: string, name: string) {
+  async createProject(
+    organizationId: string,
+    userId: string,
+    input: {
+      name: string;
+      clientId?: number | null;
+      color?: string | null;
+      hourlyRate?: string | null;
+      access?: string;
+    },
+  ) {
     const [project] = await db
       .insert(trackerProject)
-      .values({ organizationId, userId, name: name.trim() })
+      .values({
+        organizationId,
+        userId,
+        name: input.name.trim(),
+        clientId: input.clientId ?? null,
+        color: input.color ?? null,
+        hourlyRate: input.hourlyRate ?? null,
+        access: input.access ?? "public",
+      })
       .returning({ id: trackerProject.id, name: trackerProject.name });
 
     return project;
@@ -170,6 +194,25 @@ export const timeTrackerRepository = {
       .returning({ id: trackerTag.id, name: trackerTag.name });
 
     return tag;
+  },
+
+  async updateTag(organizationId: string, tagId: number, name: string) {
+    const [tag] = await db
+      .update(trackerTag)
+      .set({ name: name.trim() })
+      .where(and(eq(trackerTag.organizationId, organizationId), eq(trackerTag.id, tagId)))
+      .returning({ id: trackerTag.id, name: trackerTag.name });
+
+    return tag ?? null;
+  },
+
+  async deleteTag(organizationId: string, tagId: number) {
+    const [tag] = await db
+      .delete(trackerTag)
+      .where(and(eq(trackerTag.organizationId, organizationId), eq(trackerTag.id, tagId)))
+      .returning({ id: trackerTag.id, name: trackerTag.name });
+
+    return tag ?? null;
   },
 
   async getActiveEntry(organizationId: string, userId: string) {
@@ -423,5 +466,104 @@ export const timeTrackerRepository = {
       .returning({ id: timeEntry.id });
 
     return entry ?? null;
+  },
+
+  async getProjectsWithStats(organizationId: string, showArchived = false) {
+    const rows = await db
+      .select({
+        id: trackerProject.id,
+        name: trackerProject.name,
+        clientId: trackerProject.clientId,
+        clientName: client.name,
+        clientCurrency: client.currency,
+        color: trackerProject.color,
+        hourlyRate: trackerProject.hourlyRate,
+        isArchived: trackerProject.isArchived,
+        access: trackerProject.access,
+        trackedSeconds: sql<number>`
+          coalesce(
+            sum(
+              extract(epoch from (${timeEntry.endAt} - ${timeEntry.startAt}))
+            ) filter (where ${timeEntry.endAt} is not null),
+            0
+          )`.as("tracked_seconds"),
+      })
+      .from(trackerProject)
+      .leftJoin(client, eq(trackerProject.clientId, client.id))
+      .leftJoin(
+        timeEntry,
+        and(eq(timeEntry.projectId, trackerProject.id), isNotNull(timeEntry.endAt)),
+      )
+      .where(
+        showArchived
+          ? eq(trackerProject.organizationId, organizationId)
+          : and(
+              eq(trackerProject.organizationId, organizationId),
+              eq(trackerProject.isArchived, false),
+            ),
+      )
+      .groupBy(
+        trackerProject.id,
+        trackerProject.name,
+        trackerProject.clientId,
+        client.name,
+        client.currency,
+        trackerProject.color,
+        trackerProject.hourlyRate,
+        trackerProject.isArchived,
+        trackerProject.access,
+      )
+      .orderBy(trackerProject.name);
+
+    return rows;
+  },
+
+  async updateProject(
+    organizationId: string,
+    projectId: number,
+    input: {
+      name?: string;
+      clientId?: number | null;
+      color?: string | null;
+      hourlyRate?: string | null;
+      isArchived?: boolean;
+      access?: string;
+    },
+  ) {
+    const [updated] = await db
+      .update(trackerProject)
+      .set({
+        ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+        ...(input.clientId !== undefined ? { clientId: input.clientId } : {}),
+        ...(input.color !== undefined ? { color: input.color } : {}),
+        ...(input.hourlyRate !== undefined ? { hourlyRate: input.hourlyRate } : {}),
+        ...(input.isArchived !== undefined ? { isArchived: input.isArchived } : {}),
+        ...(input.access !== undefined ? { access: input.access } : {}),
+      })
+      .where(
+        and(eq(trackerProject.organizationId, organizationId), eq(trackerProject.id, projectId)),
+      )
+      .returning({
+        id: trackerProject.id,
+        name: trackerProject.name,
+        clientId: trackerProject.clientId,
+        color: trackerProject.color,
+        hourlyRate: trackerProject.hourlyRate,
+        isArchived: trackerProject.isArchived,
+        access: trackerProject.access,
+      });
+
+    return updated ?? null;
+  },
+
+  async deleteProject(organizationId: string, projectId: number) {
+    const [deleted] = await db
+      .delete(trackerProject)
+      .where(
+        and(eq(trackerProject.organizationId, organizationId), eq(trackerProject.id, projectId)),
+      )
+      .returning({ id: trackerProject.id });
+
+    return deleted ?? null;
   },
 };

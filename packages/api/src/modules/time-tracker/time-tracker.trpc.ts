@@ -7,12 +7,18 @@ import {
   createProjectInputSchema,
   createTagInputSchema,
   deleteEntryInputSchema,
+  deleteProjectInputSchema,
+  deleteTagInputSchema,
   discardTimerInputSchema,
+  listProjectsInputSchema,
+  listTagsInputSchema,
   overviewInputSchema,
   startTimerInputSchema,
   stopTimerInputSchema,
   updateActiveTimerInputSchema,
   updateEntryInputSchema,
+  updateProjectInputSchema,
+  updateTagInputSchema,
 } from "./time-tracker.schema";
 import { timeTrackerService } from "./time-tracker.service";
 
@@ -82,8 +88,38 @@ export const timeTrackerRouter = router({
     return timeTrackerService.createProject(orgId, ctx.session.user.id, input);
   }),
 
+  listProjects: protectedProcedure.input(listProjectsInputSchema).query(({ ctx, input }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.listProjects(orgId, input);
+  }),
+
+  updateProject: protectedProcedure.input(updateProjectInputSchema).mutation(({ ctx, input }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.updateProject(orgId, input);
+  }),
+
+  deleteProject: protectedProcedure.input(deleteProjectInputSchema).mutation(({ ctx, input }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.deleteProject(orgId, input);
+  }),
+
   createTag: protectedProcedure.input(createTagInputSchema).mutation(({ ctx, input }) => {
     const orgId = requireActiveOrg(ctx);
     return timeTrackerService.createTag(orgId, ctx.session.user.id, input);
+  }),
+
+  listTags: protectedProcedure.input(listTagsInputSchema).query(({ ctx }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.listTags(orgId);
+  }),
+
+  updateTag: protectedProcedure.input(updateTagInputSchema).mutation(({ ctx, input }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.updateTag(orgId, input);
+  }),
+
+  deleteTag: protectedProcedure.input(deleteTagInputSchema).mutation(({ ctx, input }) => {
+    const orgId = requireActiveOrg(ctx);
+    return timeTrackerService.deleteTag(orgId, input);
   }),
 });

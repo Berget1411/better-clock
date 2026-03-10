@@ -1,0 +1,16 @@
+export const TAGS_COPY = {
+  pageTitle: "Tags",
+  searchPlaceholder: "Search by name",
+  addPlaceholder: "Add new tag",
+  addButton: "ADD",
+  showActive: "Show active",
+  columnName: "NAME",
+  deleteTag: "Delete",
+  renameTag: "Rename",
+  tagDeleted: "Tag deleted",
+  tagCreated: "Tag created",
+  tagUpdated: "Tag updated",
+  noOrg: "No active organisation. Select one from the sidebar.",
+  emptyState: "No tags found.",
+  confirmDelete: "Delete tag?",
+} as const;

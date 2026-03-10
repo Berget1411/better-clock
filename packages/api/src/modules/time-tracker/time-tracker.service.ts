@@ -6,14 +6,20 @@ import type {
   CreateProjectInput,
   CreateTagInput,
   DeleteEntryInput,
+  DeleteProjectInput,
+  DeleteTagInput,
   DiscardTimerInput,
+  ListProjectsInput,
   OverviewInput,
   StartTimerInput,
   StopTimerInput,
   TrackerEntry,
   TrackerOverview,
+  TrackerProjectFull,
   UpdateActiveTimerInput,
   UpdateEntryInput,
+  UpdateProjectInput,
+  UpdateTagInput,
 } from "./time-tracker.schema";
 
 function parseDate(value: string, fieldName: string) {
@@ -271,7 +277,108 @@ export const timeTrackerService = {
       });
     }
 
-    return timeTrackerRepository.createProject(organizationId, userId, name);
+    return timeTrackerRepository.createProject(organizationId, userId, {
+      name,
+      clientId: input.clientId ?? null,
+      color: input.color ?? null,
+      hourlyRate: input.hourlyRate ?? null,
+      access: input.access ?? "public",
+    });
+  },
+
+  async listProjects(
+    organizationId: string,
+    input: ListProjectsInput,
+  ): Promise<TrackerProjectFull[]> {
+    const rows = await timeTrackerRepository.getProjectsWithStats(
+      organizationId,
+      input.showArchived,
+    );
+
+    return rows
+      .filter((row) => {
+        if (input.clientId !== undefined && input.clientId !== null) {
+          if (row.clientId !== input.clientId) return false;
+        }
+        if (input.access) {
+          if (row.access !== input.access) return false;
+        }
+        if (input.hasBilling === true) {
+          if (!row.hourlyRate || Number(row.hourlyRate) <= 0) return false;
+        }
+        if (input.hasBilling === false) {
+          if (row.hourlyRate && Number(row.hourlyRate) > 0) return false;
+        }
+        return true;
+      })
+      .map((row) => {
+        const trackedSeconds = Number(row.trackedSeconds) || 0;
+        const hourlyRate = row.hourlyRate ? Number(row.hourlyRate) : 0;
+        const amount = (trackedSeconds / 3600) * hourlyRate;
+
+        return {
+          id: row.id,
+          name: row.name,
+          clientId: row.clientId,
+          clientName: row.clientName ?? null,
+          clientCurrency: row.clientCurrency ?? null,
+          color: row.color,
+          hourlyRate: row.hourlyRate ?? null,
+          isArchived: row.isArchived,
+          access: row.access,
+          trackedSeconds,
+          amount,
+        };
+      });
+  },
+
+  async updateProject(organizationId: string, input: UpdateProjectInput): Promise<{ id: number }> {
+    const existing = await timeTrackerRepository.getProjectById(organizationId, input.id);
+
+    if (!existing) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+    }
+
+    if (
+      input.name !== undefined &&
+      input.name.trim().toLowerCase() !== existing.name.toLowerCase()
+    ) {
+      const duplicate = await timeTrackerRepository.findProjectByNormalizedName(
+        organizationId,
+        input.name,
+      );
+      if (duplicate && duplicate.id !== input.id) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "A project with that name already exists",
+        });
+      }
+    }
+
+    const updated = await timeTrackerRepository.updateProject(organizationId, input.id, {
+      name: input.name,
+      clientId: input.clientId,
+      color: input.color,
+      hourlyRate: input.hourlyRate,
+      isArchived: input.isArchived,
+      access: input.access,
+    });
+
+    if (!updated) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+    }
+
+    return { id: updated.id };
+  },
+
+  async deleteProject(organizationId: string, input: DeleteProjectInput): Promise<{ id: number }> {
+    const deleted = await timeTrackerRepository.deleteProject(organizationId, input.id);
+
+    if (!deleted) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+    }
+
+    return { id: deleted.id };
   },
 
   async createTag(organizationId: string, userId: string, input: CreateTagInput) {
@@ -286,5 +393,45 @@ export const timeTrackerService = {
     }
 
     return timeTrackerRepository.createTag(organizationId, userId, name);
+  },
+
+  async listTags(organizationId: string) {
+    return timeTrackerRepository.getTags(organizationId);
+  },
+
+  async updateTag(organizationId: string, input: UpdateTagInput) {
+    const name = normalizeName(input.name);
+    const existingTag = await timeTrackerRepository.findTagByNormalizedName(organizationId, name);
+
+    if (existingTag && existingTag.id !== input.id) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "A tag with that name already exists",
+      });
+    }
+
+    const tag = await timeTrackerRepository.updateTag(organizationId, input.id, name);
+
+    if (!tag) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Tag not found",
+      });
+    }
+
+    return tag;
+  },
+
+  async deleteTag(organizationId: string, input: DeleteTagInput) {
+    const tag = await timeTrackerRepository.deleteTag(organizationId, input.id);
+
+    if (!tag) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Tag not found",
+      });
+    }
+
+    return tag;
   },
 };

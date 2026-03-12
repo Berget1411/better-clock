@@ -128,3 +128,18 @@
     @apply font-sans;
   }
 }
+
+/* Honour the operating system's reduced-motion preference.
+   Cuts all CSS animations and transitions to near-instant so that
+   motion-sensitive users are not disturbed by entrance animations,
+   micro-interactions, or any motion added via tw-animate-css. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

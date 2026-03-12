@@ -7,11 +7,12 @@ export const Route = createFileRoute("/home")({
   head: () => ({
     meta: [
       {
-        title: "Open Clock Home",
+        title: "Open Clock | Home",
       },
       {
         name: "description",
-        content: "Simple dashboard landing page for Open Clock.",
+        content:
+          "Track time with clear project context, honest billable reporting, and a calm workspace.",
       },
     ],
   }),

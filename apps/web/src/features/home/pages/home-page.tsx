@@ -1,104 +1,167 @@
-import { ArrowUpRightIcon, Clock3Icon } from "lucide-react";
+import { useState } from "react";
+import { ArrowUpRightIcon, ChevronRightIcon, Clock3Icon, ImageOffIcon } from "lucide-react";
+import { LazyMotion, domAnimation, m } from "motion/react";
+
 import { Button } from "@open-learn/ui/components/button";
 import { Link } from "@tanstack/react-router";
-import heroImage from "@/public/example-hero.png";
+
+import heroAvif from "@/public/example-hero.avif";
+import heroAvif832 from "@/public/example-hero-832.avif";
+import heroWebp from "@/public/example-hero.webp";
+import heroWebp832 from "@/public/example-hero-832.webp";
+import heroPng from "@/public/example-hero.png";
 
 const GITHUB_URL = "https://github.com/Berget1411/open-clock";
 
-export default function HomePage() {
+function HeroImageFallback() {
   return (
-    <div className="relative min-h-svh overflow-hidden bg-[#050505] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_bottom,rgba(255,255,255,0.04),transparent_38%)]" />
-      <div className="absolute inset-y-0 left-1/2 w-[1200px] -translate-x-1/2 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)] opacity-40 blur-3xl" />
+    <div
+      className="flex h-48 w-full flex-col items-center justify-center gap-2 bg-muted/20 text-muted-foreground"
+      role="img"
+      aria-label="Dashboard preview unavailable"
+    >
+      <ImageOffIcon className="size-5 shrink-0" aria-hidden="true" />
+      <p className="text-xs">Preview unavailable</p>
+    </div>
+  );
+}
 
-      <div className="relative mx-auto flex min-h-svh w-full max-w-[1680px] flex-col px-6 py-6 sm:px-8 lg:px-12">
-        <header className="flex items-center justify-between gap-4">
-          <a
-            href="/home"
-            className="inline-flex items-center gap-3 text-sm font-medium text-white/90"
-          >
-            <span className="flex size-8 items-center justify-center  border border-white/10 bg-white/5">
-              <Clock3Icon className="size-4" />
-            </span>
-            <span>Open Clock</span>
-          </a>
+export default function HomePage() {
+  const [heroError, setHeroError] = useState(false);
 
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-white/50 transition hover:text-white/90"
-          >
-            <span>GitHub</span>
-            <ArrowUpRightIcon className="size-4" />
-          </a>
-        </header>
+  return (
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-svh bg-background text-foreground">
+        <m.header
+          className="border-b border-border/70"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+            <Link
+              to="/home"
+              aria-label="Open Clock home"
+              className="inline-flex min-h-11 min-w-0 items-center gap-3 text-sm font-medium transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
+            >
+              <span
+                className="flex size-9 shrink-0 items-center justify-center border border-border bg-muted text-foreground"
+                aria-hidden="true"
+              >
+                <Clock3Icon className="size-4" />
+              </span>
+              <span className="min-w-0 truncate">Open Clock</span>
+            </Link>
 
-        <main className="flex flex-1 flex-col items-center pt-[8vh] text-center sm:pt-[10vh]">
-          <h1 className="max-w-5xl text-balance text-4xl font-medium tracking-[-0.05em] text-white opacity-0 [animation:fade-in_1s_ease-out_forwards] sm:text-6xl lg:text-[5.25rem] lg:leading-[1.05]">
-            Open Clock is the best way to track your time.
-          </h1>
-
-          <Button
-            asChild
-            variant="default"
-            size="lg"
-            className="mt-10 px-10 py-5 text-base font-medium"
-          >
-            <Link to="/">Go to app</Link>
-          </Button>
-          <div className="mt-10 w-full max-w-[1400px] opacity-0 [animation:screenshot-in_1s_ease-out_0.15s_forwards]">
-            <img
-              src={heroImage}
-              alt="Open Clock dashboard preview"
-              className="block w-full rounded-[24px] border border-white/10 shadow-[0_24px_120px_rgba(0,0,0,0.6)]"
-              style={{
-                WebkitMaskImage: "linear-gradient(to bottom, black 82%, transparent 100%)",
-                maskImage: "linear-gradient(to bottom, black 82%, transparent 100%)",
-              }}
-            />
+            <nav aria-label="Site navigation">
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" asChild className="h-11 px-3 text-xs text-muted-foreground">
+                  <a
+                    href={GITHUB_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    aria-label="Open Clock on GitHub (opens in new tab)"
+                  >
+                    <span aria-hidden="true">GitHub</span>
+                    <ArrowUpRightIcon className="size-4 rtl:rotate-[270deg]" aria-hidden="true" />
+                  </a>
+                </Button>
+                <Button variant="outline" asChild className="h-11 px-4 text-xs">
+                  <Link to="/">Open app</Link>
+                </Button>
+              </div>
+            </nav>
           </div>
+        </m.header>
+
+        <main>
+          <section
+            aria-label="Product overview"
+            className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-12 sm:px-6 sm:py-16"
+          >
+            <m.div
+              className="max-w-2xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            >
+              <h1 className="[overflow-wrap:anywhere] text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+                Know where the work went.
+              </h1>
+              <p className="mt-4 [overflow-wrap:anywhere] text-sm leading-6 text-muted-foreground sm:text-base">
+                Precise time tracking for freelancers and small teams.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button asChild className="group h-11 px-4 text-sm">
+                  <Link to="/">
+                    Go to app
+                    <ChevronRightIcon
+                      className="size-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild className="h-11 px-4 text-sm">
+                  <a href={GITHUB_URL} target="_blank" rel="noreferrer noopener">
+                    GitHub
+                    <ArrowUpRightIcon className="size-4 rtl:rotate-[270deg]" aria-hidden="true" />
+                  </a>
+                </Button>
+              </div>
+            </m.div>
+
+            <m.div
+              className="ring-1 ring-foreground/10"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            >
+              {heroError ? (
+                <HeroImageFallback />
+              ) : (
+                <picture>
+                  <source
+                    type="image/avif"
+                    srcSet={`${heroAvif832} 832w, ${heroAvif} 1664w`}
+                    sizes="(max-width: 1023px) 100vw, 960px"
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={`${heroWebp832} 832w, ${heroWebp} 1664w`}
+                    sizes="(max-width: 1023px) 100vw, 960px"
+                  />
+                  <img
+                    src={heroPng}
+                    alt="Open Clock dashboard showing tracked hours, recent activity, and reporting views."
+                    width={1664}
+                    height={1720}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setHeroError(true)}
+                    className="block h-auto w-full bg-muted/20"
+                  />
+                </picture>
+              )}
+            </m.div>
+          </section>
         </main>
 
-        <footer className="mt-6 flex items-center justify-between gap-4 text-sm text-white/35">
-          <p>2026 Open Clock Inc</p>
-          <div className="flex items-center gap-6">
+        <footer className="border-t border-border/70">
+          <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 text-xs text-muted-foreground sm:px-6">
+            <p>© 2026 Open Clock</p>
             <a
               href={GITHUB_URL}
               target="_blank"
-              rel="noreferrer"
-              className="transition hover:text-white/70"
+              rel="noreferrer noopener"
+              aria-label="Open Clock on GitHub (opens in new tab)"
+              className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
-              GitHub
+              <span aria-hidden="true">GitHub</span>
+              <ArrowUpRightIcon className="size-4 rtl:rotate-[270deg]" aria-hidden="true" />
             </a>
           </div>
         </footer>
       </div>
-      <style>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes screenshot-in {
-          from {
-            opacity: 0;
-            transform: scale(0.98);
-          }
-
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
-    </div>
+    </LazyMotion>
   );
 }

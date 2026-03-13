@@ -22,6 +22,7 @@ import { Route as AppTagsRouteImport } from './routes/_app.tags'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppProjectsRouteImport } from './routes/_app.projects'
 import { Route as AppClientsRouteImport } from './routes/_app.clients'
+import { Route as AppCalendarRouteImport } from './routes/_app.calendar'
 import { Route as AppAiRouteImport } from './routes/_app.ai'
 
 const SuccessRoute = SuccessRouteImport.update({
@@ -89,6 +90,11 @@ const AppClientsRoute = AppClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalendarRoute = AppCalendarRouteImport.update({
+  id: '/calendar',
+  path: '/calendar',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAiRoute = AppAiRouteImport.update({
   id: '/ai',
   path: '/ai',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/ai': typeof AppAiRoute
+  '/calendar': typeof AppCalendarRoute
   '/clients': typeof AppClientsRoute
   '/projects': typeof AppProjectsRoute
   '/reports': typeof AppReportsRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/ai': typeof AppAiRoute
+  '/calendar': typeof AppCalendarRoute
   '/clients': typeof AppClientsRoute
   '/projects': typeof AppProjectsRoute
   '/reports': typeof AppReportsRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/success': typeof SuccessRoute
   '/_app/ai': typeof AppAiRoute
+  '/_app/calendar': typeof AppCalendarRoute
   '/_app/clients': typeof AppClientsRoute
   '/_app/projects': typeof AppProjectsRoute
   '/_app/reports': typeof AppReportsRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/success'
     | '/ai'
+    | '/calendar'
     | '/clients'
     | '/projects'
     | '/reports'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/success'
     | '/ai'
+    | '/calendar'
     | '/clients'
     | '/projects'
     | '/reports'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/success'
     | '/_app/ai'
+    | '/_app/calendar'
     | '/_app/clients'
     | '/_app/projects'
     | '/_app/reports'
@@ -292,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/calendar': {
+      id: '/_app/calendar'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof AppCalendarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ai': {
       id: '/_app/ai'
       path: '/ai'
@@ -304,6 +323,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
+  AppCalendarRoute: typeof AppCalendarRoute
   AppClientsRoute: typeof AppClientsRoute
   AppProjectsRoute: typeof AppProjectsRoute
   AppReportsRoute: typeof AppReportsRoute
@@ -316,6 +336,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
+  AppCalendarRoute: AppCalendarRoute,
   AppClientsRoute: AppClientsRoute,
   AppProjectsRoute: AppProjectsRoute,
   AppReportsRoute: AppReportsRoute,

@@ -1,3 +1,4 @@
+import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 import type {
   TrackerEntry,
   TrackerProject,
@@ -12,10 +13,11 @@ import { z } from "zod";
 import { Button } from "@open-learn/ui/components/button";
 import { Collapsible, CollapsibleContent } from "@open-learn/ui/components/collapsible";
 import { FieldError } from "@open-learn/ui/components/field";
-import { Input } from "@open-learn/ui/components/input";
 
 import { useStartTimer, useStopTimer, useUpdateActiveTimer } from "../services/mutations";
 import { formatDuration, getElapsedSeconds, getTimerFormValues } from "../utils/date-time";
+import { getCompatibleTaskId } from "../utils/task-reference";
+import { ActivityReferenceInput } from "./activity-reference-input";
 import { BillableBadge } from "./billable-badge";
 import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactProjectPicker } from "./compact-project-picker";
@@ -24,6 +26,7 @@ import { CompactTagPicker } from "./compact-tag-picker";
 const timerFormSchema = z.object({
   description: z.string().max(500, "Description must be 500 characters or less"),
   projectId: z.number().nullable(),
+  taskId: z.number().nullable(),
   tagIds: z.array(z.number()),
   isBillable: z.boolean(),
 });
@@ -31,13 +34,17 @@ const timerFormSchema = z.object({
 interface TimerEntryFormProps {
   activeEntry: TrackerEntry | null;
   projects: TrackerProject[];
+  tasks: TaskListItem[];
   tags: TrackerTag[];
   range: TrackerOverviewRange;
 }
 
-export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntryFormProps) {
+export function TimerEntryForm({ activeEntry, projects, tasks, tags, range }: TimerEntryFormProps) {
   const [now, setNow] = useState(() => new Date());
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [activityMode, setActivityMode] = useState<"description" | "task">(
+    activeEntry?.task ? "task" : "description",
+  );
   const startTimer = useStartTimer(range);
   const updateActiveTimer = useUpdateActiveTimer(range);
   const stopTimer = useStopTimer(range);
@@ -50,6 +57,7 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
           entryId: activeEntry.id,
           description: value.description.trim(),
           projectId: value.projectId,
+          taskId: value.taskId,
           tagIds: value.tagIds,
           isBillable: value.isBillable,
         });
@@ -60,16 +68,19 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
       await startTimer.mutateAsync({
         description: value.description.trim(),
         projectId: value.projectId,
+        taskId: value.taskId,
         tagIds: value.tagIds,
         isBillable: value.isBillable,
       });
       form.reset(getTimerFormValues(null));
+      setActivityMode("description");
       setDetailsOpen(false);
     },
   });
 
   useEffect(() => {
     form.reset(getTimerFormValues(activeEntry));
+    setActivityMode(activeEntry?.task ? "task" : "description");
   }, [activeEntry]);
 
   useEffect(() => {
@@ -108,52 +119,30 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
             return (
               <>
                 <div className="flex flex-col gap-2 rounded-none border bg-card p-2 md:flex-row md:items-center md:gap-2">
-                  <div className="min-w-0 flex-1">
-                    <Input
-                      id="tracker-description"
-                      value={descriptionField.state.value}
-                      onBlur={descriptionField.handleBlur}
-                      onChange={(event) => descriptionField.handleChange(event.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="What are you working on? (optional)"
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  {!activeEntry ? (
-                    <>
-                      <form.Field name="projectId">
-                        {(projectField) => (
-                          <CompactProjectPicker
-                            value={projectField.state.value}
-                            onChange={projectField.handleChange}
-                            projects={projects}
-                            range={range}
+                  <form.Subscribe selector={(state) => state.values.projectId}>
+                    {(projectId) => (
+                      <form.Field name="taskId">
+                        {(taskField) => (
+                          <ActivityReferenceInput
+                            mode={activityMode}
+                            onModeChange={setActivityMode}
+                            description={{
+                              id: "tracker-description",
+                              value: descriptionField.state.value,
+                              onBlur: descriptionField.handleBlur,
+                              onChange: descriptionField.handleChange,
+                              isInvalid,
+                              placeholder: "What are you working on? (optional)",
+                            }}
+                            taskId={taskField.state.value}
+                            projectId={projectId}
+                            onTaskChange={taskField.handleChange}
+                            tasks={tasks}
                           />
                         )}
                       </form.Field>
-
-                      <form.Field name="tagIds">
-                        {(tagField) => (
-                          <CompactTagPicker
-                            value={tagField.state.value}
-                            onChange={tagField.handleChange}
-                            tags={tags}
-                            range={range}
-                          />
-                        )}
-                      </form.Field>
-
-                      <form.Field name="isBillable">
-                        {(billableField) => (
-                          <CompactBillableToggle
-                            checked={billableField.state.value}
-                            onCheckedChange={billableField.handleChange}
-                          />
-                        )}
-                      </form.Field>
-                    </>
-                  ) : null}
+                    )}
+                  </form.Subscribe>
 
                   {activeEntry ? <BillableBadge isBillable={activeEntry.isBillable} /> : null}
 
@@ -168,8 +157,8 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
                         disabled={
                           isSubmitting ||
                           startTimer.isPending ||
-                          stopTimer.isPending ||
-                          updateActiveTimer.isPending
+                          updateActiveTimer.isPending ||
+                          stopTimer.isPending
                         }
                         className="min-w-24"
                       >
@@ -178,35 +167,44 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
                     )}
                   </form.Subscribe>
 
-                  {activeEntry ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDetailsOpen((open) => !open)}
-                      aria-label={detailsOpen ? "Hide timer details" : "Edit timer details"}
-                    >
-                      {detailsOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                    </Button>
-                  ) : null}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDetailsOpen((open) => !open)}
+                    aria-label={detailsOpen ? "Hide timer details" : "Edit timer details"}
+                  >
+                    {detailsOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                  </Button>
                 </div>
 
-                <FieldError errors={descriptionField.state.meta.errors} />
+                <div className="px-2">
+                  <FieldError errors={descriptionField.state.meta.errors} />
+                </div>
               </>
             );
           }}
         </form.Field>
 
-        <CollapsibleContent className="border border-t-0 bg-card p-2">
-          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+        <CollapsibleContent className="grid gap-2 rounded-none border bg-card p-3">
+          <div className="flex flex-wrap items-center gap-2">
             <form.Field name="projectId">
               {(projectField) => (
-                <CompactProjectPicker
-                  value={projectField.state.value}
-                  onChange={projectField.handleChange}
-                  projects={projects}
-                  range={range}
-                />
+                <form.Field name="taskId">
+                  {(taskField) => (
+                    <CompactProjectPicker
+                      value={projectField.state.value}
+                      onChange={(projectId) => {
+                        projectField.handleChange(projectId);
+                        taskField.handleChange(
+                          getCompatibleTaskId(tasks, taskField.state.value, projectId),
+                        );
+                      }}
+                      projects={projects}
+                      range={range}
+                    />
+                  )}
+                </form.Field>
               )}
             </form.Field>
 
@@ -229,16 +227,6 @@ export function TimerEntryForm({ activeEntry, projects, tags, range }: TimerEntr
                 />
               )}
             </form.Field>
-
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-10 justify-start px-3 text-muted-foreground"
-              onClick={() => setDetailsOpen(false)}
-            >
-              <ChevronDownIcon data-icon="inline-start" />
-              Done editing
-            </Button>
           </div>
         </CollapsibleContent>
       </form>

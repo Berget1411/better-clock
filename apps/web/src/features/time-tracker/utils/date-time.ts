@@ -70,9 +70,12 @@ export function getDefaultManualValues() {
     end.setHours(nextHour, 0, 0, 0);
   }
   return {
+    description: "",
+    date: toLocalDateInputValue(start),
     startTime: toLocalTimeInputValue(start),
     endTime: toLocalTimeInputValue(end),
     projectId: null as number | null,
+    taskId: null as number | null,
     tagIds: [] as number[],
     isBillable: false,
   };
@@ -82,6 +85,7 @@ export function getTimerFormValues(entry?: TrackerEntry | null) {
   return {
     description: entry?.description ?? "",
     projectId: entry?.project?.id ?? null,
+    taskId: entry?.task?.id ?? null,
     tagIds: entry?.tags.map((tag) => tag.id) ?? [],
     isBillable: entry?.isBillable ?? false,
   };
@@ -97,6 +101,7 @@ export function getEditableEntryValues(entry: TrackerEntry) {
     startTime: toLocalTimeInputValue(start),
     endTime: toLocalTimeInputValue(end),
     projectId: entry.project?.id ?? null,
+    taskId: entry.task?.id ?? null,
     tagIds: entry.tags.map((tag) => tag.id),
     isBillable: entry.isBillable,
   };

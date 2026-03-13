@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { organization, user } from "./auth";
+import { task } from "./task";
 
 // client must be declared before trackerProject so the FK reference resolves
 export const client = pgTable(
@@ -99,6 +100,7 @@ export const timeEntry = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     description: text("description").notNull(),
     projectId: integer("project_id").references(() => trackerProject.id, { onDelete: "set null" }),
+    taskId: integer("task_id").references(() => task.id, { onDelete: "set null" }),
     isBillable: boolean("is_billable").default(false).notNull(),
     startAt: timestamp("start_at").notNull(),
     endAt: timestamp("end_at"),
@@ -112,6 +114,7 @@ export const timeEntry = pgTable(
     index("time_entry_org_id_idx").on(table.organizationId),
     index("time_entry_user_id_idx").on(table.userId),
     index("time_entry_project_id_idx").on(table.projectId),
+    index("time_entry_task_id_idx").on(table.taskId),
     index("time_entry_start_at_idx").on(table.startAt),
     uniqueIndex("time_entry_active_org_user_idx")
       .on(table.organizationId, table.userId)

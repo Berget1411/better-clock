@@ -1,3 +1,4 @@
+import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 import type {
   TrackerEntry,
   TrackerProject,
@@ -6,7 +7,7 @@ import type {
 import type { TrackerOverviewRange } from "../utils/date-time";
 
 import { useForm } from "@tanstack/react-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ChevronUpIcon, Trash2Icon } from "lucide-react";
 import { z } from "zod";
 import { Button } from "@open-learn/ui/components/button";
@@ -14,24 +15,27 @@ import { FieldError } from "@open-learn/ui/components/field";
 import { Input } from "@open-learn/ui/components/input";
 
 import { useDeleteEntry, useUpdateEntry } from "../services/mutations";
+import { getCompatibleTaskId } from "../utils/task-reference";
 import {
   combineDateAndTime,
   formatDuration,
   formatRelativeDateLabel,
   getEditableEntryValues,
 } from "../utils/date-time";
+import { ActivityReferenceInput } from "./activity-reference-input";
 import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactDatePicker } from "./compact-date-picker";
 import { CompactProjectPicker } from "./compact-project-picker";
 import { CompactTagPicker } from "./compact-tag-picker";
 
-const editEntrySchema = z
+const activityEntrySchema = z
   .object({
     description: z.string().max(500, "Description must be 500 characters or less"),
     date: z.string().min(1, "Date is required"),
     startTime: z.string().min(1, "Start time is required"),
     endTime: z.string().min(1, "End time is required"),
     projectId: z.number().nullable(),
+    taskId: z.number().nullable(),
     tagIds: z.array(z.number()),
     isBillable: z.boolean(),
   })
@@ -51,6 +55,7 @@ const editEntrySchema = z
 interface ActivityInlineEditorProps {
   entry: TrackerEntry;
   projects: TrackerProject[];
+  tasks: TaskListItem[];
   tags: TrackerTag[];
   range: TrackerOverviewRange;
   onCancel: () => void;
@@ -59,15 +64,19 @@ interface ActivityInlineEditorProps {
 export function ActivityInlineEditor({
   entry,
   projects,
+  tasks,
   tags,
   range,
   onCancel,
 }: ActivityInlineEditorProps) {
+  const [activityMode, setActivityMode] = useState<"description" | "task">(
+    entry.task ? "task" : "description",
+  );
   const updateEntry = useUpdateEntry(range);
   const deleteEntry = useDeleteEntry(range);
   const form = useForm({
     defaultValues: getEditableEntryValues(entry),
-    validators: { onSubmit: editEntrySchema },
+    validators: { onSubmit: activityEntrySchema },
     onSubmit: async ({ value }) => {
       const startAt = combineDateAndTime(value.date, value.startTime);
       const endAt = combineDateAndTime(value.date, value.endTime);
@@ -80,17 +89,20 @@ export function ActivityInlineEditor({
         entryId: entry.id,
         description: value.description.trim(),
         projectId: value.projectId,
+        taskId: value.taskId,
         tagIds: value.tagIds,
         isBillable: value.isBillable,
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
       });
+
       onCancel();
     },
   });
 
   useEffect(() => {
     form.reset(getEditableEntryValues(entry));
+    setActivityMode(entry.task ? "task" : "description");
   }, [entry]);
 
   return (
@@ -119,26 +131,44 @@ export function ActivityInlineEditor({
 
                 return (
                   <>
-                    <div className="flex flex-col gap-2 bg-card p-2 md:flex-row md:items-center md:gap-2">
-                      <div className="min-w-0 flex-1">
-                        <Input
-                          value={descriptionField.state.value}
-                          onBlur={descriptionField.handleBlur}
-                          onChange={(event) => descriptionField.handleChange(event.target.value)}
-                          aria-invalid={descriptionInvalid}
-                          placeholder="Add a description (optional)"
-                          className="h-10 text-sm"
-                        />
-                      </div>
+                    <div className="flex flex-col gap-2 rounded-none border bg-card p-2 md:flex-row md:items-center md:gap-2">
+                      <form.Field name="taskId">
+                        {(taskField) => (
+                          <ActivityReferenceInput
+                            mode={activityMode}
+                            onModeChange={setActivityMode}
+                            description={{
+                              value: descriptionField.state.value,
+                              onBlur: descriptionField.handleBlur,
+                              onChange: descriptionField.handleChange,
+                              isInvalid: descriptionInvalid,
+                              placeholder: "Add a description (optional)",
+                            }}
+                            taskId={taskField.state.value}
+                            projectId={values.projectId}
+                            onTaskChange={taskField.handleChange}
+                            tasks={tasks}
+                          />
+                        )}
+                      </form.Field>
 
                       <form.Field name="projectId">
                         {(projectField) => (
-                          <CompactProjectPicker
-                            value={projectField.state.value}
-                            onChange={projectField.handleChange}
-                            projects={projects}
-                            range={range}
-                          />
+                          <form.Field name="taskId">
+                            {(taskField) => (
+                              <CompactProjectPicker
+                                value={projectField.state.value}
+                                onChange={(projectId) => {
+                                  projectField.handleChange(projectId);
+                                  taskField.handleChange(
+                                    getCompatibleTaskId(tasks, taskField.state.value, projectId),
+                                  );
+                                }}
+                                projects={projects}
+                                range={range}
+                              />
+                            )}
+                          </form.Field>
                         )}
                       </form.Field>
 

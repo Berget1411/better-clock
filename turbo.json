@@ -34,7 +34,19 @@
     "deploy": {
       "cache": false
     },
+    "deploy:dev": {
+      "cache": false
+    },
+    "deploy:prod": {
+      "cache": false
+    },
     "destroy": {
+      "cache": false
+    },
+    "destroy:dev": {
+      "cache": false
+    },
+    "destroy:prod": {
       "cache": false
     }
   }

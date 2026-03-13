@@ -14,6 +14,13 @@ export interface DashboardTag {
   name: string;
 }
 
+export interface DashboardTask {
+  id: number;
+  displayKey: string;
+  title: string;
+  status: "backlog" | "todo" | "in_progress" | "done" | "canceled";
+}
+
 export interface DashboardEntry {
   id: number;
   description: string;
@@ -21,6 +28,7 @@ export interface DashboardEntry {
   startAt: string;
   endAt: string | null;
   project: DashboardProject | null;
+  task: DashboardTask | null;
   tags: DashboardTag[];
 }
 
@@ -232,7 +240,7 @@ export function buildTrackerDashboardMetrics({
       tagTotals.set(resolvedTag, (tagTotals.get(resolvedTag) ?? 0) + durationSeconds);
     }
 
-    const activityName = getEntryDescriptionLabel(entry.description);
+    const activityName = getEntryDescriptionLabel(entry.description || entry.task?.title || "");
     const activityKey = `${activityName}::${projectName}`;
     const activity = activityTotals.get(activityKey) ?? {
       name: activityName,

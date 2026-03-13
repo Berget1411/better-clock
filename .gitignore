@@ -10,6 +10,7 @@ build
 
 # Environment variables
 .env
+.env.*
 .env*.local
 
 # IDEs and editors
@@ -37,8 +38,12 @@ lerna-debug.log*
 .turbo
 .nx
 
-# Better-T-Stack
-.alchemy
+# Better-T-Stack — ignore local alchemy state, track deployed stages
+.alchemy/
+!.alchemy/dev/
+!.alchemy/dev/**
+!.alchemy/prod/
+!.alchemy/prod/**
 
 # Testing
 coverage

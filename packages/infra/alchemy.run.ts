@@ -7,16 +7,14 @@ config({ path: "./.env" });
 config({ path: "../../apps/web/.env" });
 config({ path: "../../apps/server/.env" });
 
-const app = await alchemy("open-learn");
+const app = await alchemy("open-clock");
 
-export const web = await Vite("web", {
-  cwd: "../../apps/web",
-  assets: "dist",
-  bindings: {
-    VITE_SERVER_URL: alchemy.env.VITE_SERVER_URL!,
-    DEV_PORT: "3001",
-  },
-});
+// Load stage-specific overrides after alchemy resolves the real stage.
+// `alchemy dev` (no --stage) resolves to $USER — no .env.$USER file exists,
+// so localhost values from apps/server/.env are preserved.
+// `alchemy deploy --stage dev/prod` resolves to "dev"/"prod" and loads the
+// corresponding file, overriding CORS_ORIGIN/BETTER_AUTH_URL with Cloudflare URLs.
+config({ path: `./.env.${app.stage}`, override: true });
 
 export const server = await Worker("server", {
   cwd: "../../apps/server",
@@ -39,6 +37,15 @@ export const server = await Worker("server", {
   },
   dev: {
     port: 3002,
+  },
+});
+
+export const web = await Vite("web", {
+  cwd: "../../apps/web",
+  assets: "dist",
+  bindings: {
+    VITE_SERVER_URL: server.url,
+    DEV_PORT: "3001",
   },
 });
 

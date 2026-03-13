@@ -1,3 +1,4 @@
+import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 import type {
   TrackerEntry,
   TrackerProject,
@@ -25,6 +26,7 @@ interface ActivityRowProps {
   isExpanded: boolean;
   onToggle: () => void;
   projects: TrackerProject[];
+  tasks: TaskListItem[];
   tags: TrackerTag[];
   range: TrackerOverviewRange;
   onClose: () => void;
@@ -35,6 +37,7 @@ export function ActivityRow({
   isExpanded,
   onToggle,
   projects,
+  tasks,
   tags,
   range,
   onClose,
@@ -42,6 +45,7 @@ export function ActivityRow({
   const duration = formatDuration(getEntryDurationSeconds(entry));
   const descriptionLabel = getEntryDescriptionLabel(entry.description);
   const hasDescription = entry.description.trim().length > 0;
+  const primaryLabel = hasDescription ? descriptionLabel : (entry.task?.title ?? descriptionLabel);
 
   return (
     <div className="overflow-hidden border bg-card">
@@ -49,6 +53,7 @@ export function ActivityRow({
         <ActivityInlineEditor
           entry={entry}
           projects={projects}
+          tasks={tasks}
           tags={tags}
           range={range}
           onCancel={onClose}
@@ -73,10 +78,10 @@ export function ActivityRow({
               <div
                 className={cn(
                   "truncate font-medium",
-                  !hasDescription && "italic text-muted-foreground",
+                  !hasDescription && !entry.task && "italic text-muted-foreground",
                 )}
               >
-                {descriptionLabel}
+                {primaryLabel}
               </div>
               <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                 <PencilLineIcon className="size-3" />
@@ -86,6 +91,7 @@ export function ActivityRow({
           </div>
           <div className="flex flex-wrap gap-2 md:flex-nowrap">
             <BillableBadge isBillable={entry.isBillable} />
+            {entry.task ? <Badge variant="outline">{entry.task.displayKey}</Badge> : null}
             {entry.project ? <Badge variant="outline">{entry.project.name}</Badge> : null}
             {entry.tags.map((tag) => (
               <Badge key={tag.id} variant="ghost">

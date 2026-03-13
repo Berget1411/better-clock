@@ -10,6 +10,13 @@ export const trackerTagSchema = z.object({
   name: z.string(),
 });
 
+export const trackerTaskSchema = z.object({
+  id: z.number().int().positive(),
+  displayKey: z.string(),
+  title: z.string(),
+  status: z.enum(["backlog", "todo", "in_progress", "done", "canceled"]),
+});
+
 export const trackerEntrySchema = z.object({
   id: z.number().int().positive(),
   description: z.string(),
@@ -17,6 +24,7 @@ export const trackerEntrySchema = z.object({
   startAt: z.string(),
   endAt: z.string().nullable(),
   project: trackerProjectSchema.nullable(),
+  task: trackerTaskSchema.nullable(),
   tags: z.array(trackerTagSchema),
 });
 
@@ -28,6 +36,7 @@ export const overviewInputSchema = z.object({
 const trackerMetadataInputSchema = z.object({
   description: z.string().trim().max(500),
   projectId: z.number().int().positive().nullable(),
+  taskId: z.number().int().positive().nullable(),
   tagIds: z.array(z.number().int().positive()),
   isBillable: z.boolean(),
 });
@@ -137,6 +146,7 @@ export const trackerOverviewSchema = z.object({
 export type TrackerProject = z.infer<typeof trackerProjectSchema>;
 export type TrackerProjectFull = z.infer<typeof trackerProjectFullSchema>;
 export type TrackerTag = z.infer<typeof trackerTagSchema>;
+export type TrackerTask = z.infer<typeof trackerTaskSchema>;
 export type TrackerEntry = z.infer<typeof trackerEntrySchema>;
 export type TrackerOverview = z.infer<typeof trackerOverviewSchema>;
 

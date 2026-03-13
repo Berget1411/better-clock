@@ -41,6 +41,11 @@ const navMainItems = [
     icon: Clock3Icon,
   },
   {
+    title: "Tasks",
+    to: "/tasks",
+    icon: ListTodoIcon,
+  },
+  {
     title: "Calendar",
     to: "/calendar",
     icon: CalendarIcon,
@@ -49,11 +54,6 @@ const navMainItems = [
     title: "Kanban",
     to: "/kanban",
     icon: KanbanIcon,
-  },
-  {
-    title: "Todos",
-    to: "/todos",
-    icon: ListTodoIcon,
   },
   {
     title: "AI Chat",

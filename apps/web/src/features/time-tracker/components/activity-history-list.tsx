@@ -1,3 +1,4 @@
+import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 import type {
   TrackerEntry,
   TrackerProject,
@@ -24,6 +25,7 @@ import { ActivityRow } from "./activity-row";
 interface ActivityHistoryListProps {
   entries: TrackerEntry[];
   projects: TrackerProject[];
+  tasks: TaskListItem[];
   tags: TrackerTag[];
   range: TrackerOverviewRange;
   expandedEntryId: number | null;
@@ -34,6 +36,7 @@ interface ActivityHistoryListProps {
 export function ActivityHistoryList({
   entries,
   projects,
+  tasks,
   tags,
   range,
   expandedEntryId,
@@ -103,6 +106,7 @@ export function ActivityHistoryList({
                         onExpandedEntryChange(expandedEntryId === entry.id ? null : entry.id)
                       }
                       projects={projects}
+                      tasks={tasks}
                       tags={tags}
                       range={range}
                       onClose={() => onExpandedEntryChange(null)}

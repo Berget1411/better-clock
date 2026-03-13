@@ -16,8 +16,8 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation.$invitationId'
 import { Route as AppTrackerRouteImport } from './routes/_app.tracker'
-import { Route as AppTodosRouteImport } from './routes/_app.todos'
 import { Route as AppTeamsRouteImport } from './routes/_app.teams'
+import { Route as AppTasksRouteImport } from './routes/_app.tasks'
 import { Route as AppTagsRouteImport } from './routes/_app.tags'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppProjectsRouteImport } from './routes/_app.projects'
@@ -59,14 +59,14 @@ const AppTrackerRoute = AppTrackerRouteImport.update({
   path: '/tracker',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTodosRoute = AppTodosRouteImport.update({
-  id: '/todos',
-  path: '/todos',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppTeamsRoute = AppTeamsRouteImport.update({
   id: '/teams',
   path: '/teams',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTasksRoute = AppTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTagsRoute = AppTagsRouteImport.update({
@@ -105,8 +105,8 @@ export interface FileRoutesByFullPath {
   '/projects': typeof AppProjectsRoute
   '/reports': typeof AppReportsRoute
   '/tags': typeof AppTagsRoute
+  '/tasks': typeof AppTasksRoute
   '/teams': typeof AppTeamsRoute
-  '/todos': typeof AppTodosRoute
   '/tracker': typeof AppTrackerRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
 }
@@ -119,8 +119,8 @@ export interface FileRoutesByTo {
   '/projects': typeof AppProjectsRoute
   '/reports': typeof AppReportsRoute
   '/tags': typeof AppTagsRoute
+  '/tasks': typeof AppTasksRoute
   '/teams': typeof AppTeamsRoute
-  '/todos': typeof AppTodosRoute
   '/tracker': typeof AppTrackerRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
   '/': typeof AppIndexRoute
@@ -136,8 +136,8 @@ export interface FileRoutesById {
   '/_app/projects': typeof AppProjectsRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/tags': typeof AppTagsRoute
+  '/_app/tasks': typeof AppTasksRoute
   '/_app/teams': typeof AppTeamsRoute
-  '/_app/todos': typeof AppTodosRoute
   '/_app/tracker': typeof AppTrackerRoute
   '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
   '/_app/': typeof AppIndexRoute
@@ -154,8 +154,8 @@ export interface FileRouteTypes {
     | '/projects'
     | '/reports'
     | '/tags'
+    | '/tasks'
     | '/teams'
-    | '/todos'
     | '/tracker'
     | '/accept-invitation/$invitationId'
   fileRoutesByTo: FileRoutesByTo
@@ -168,8 +168,8 @@ export interface FileRouteTypes {
     | '/projects'
     | '/reports'
     | '/tags'
+    | '/tasks'
     | '/teams'
-    | '/todos'
     | '/tracker'
     | '/accept-invitation/$invitationId'
     | '/'
@@ -184,8 +184,8 @@ export interface FileRouteTypes {
     | '/_app/projects'
     | '/_app/reports'
     | '/_app/tags'
+    | '/_app/tasks'
     | '/_app/teams'
-    | '/_app/todos'
     | '/_app/tracker'
     | '/accept-invitation/$invitationId'
     | '/_app/'
@@ -250,18 +250,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTrackerRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/todos': {
-      id: '/_app/todos'
-      path: '/todos'
-      fullPath: '/todos'
-      preLoaderRoute: typeof AppTodosRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/teams': {
       id: '/_app/teams'
       path: '/teams'
       fullPath: '/teams'
       preLoaderRoute: typeof AppTeamsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tasks': {
+      id: '/_app/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AppTasksRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tags': {
@@ -308,8 +308,8 @@ interface AppRouteChildren {
   AppProjectsRoute: typeof AppProjectsRoute
   AppReportsRoute: typeof AppReportsRoute
   AppTagsRoute: typeof AppTagsRoute
+  AppTasksRoute: typeof AppTasksRoute
   AppTeamsRoute: typeof AppTeamsRoute
-  AppTodosRoute: typeof AppTodosRoute
   AppTrackerRoute: typeof AppTrackerRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -320,8 +320,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppProjectsRoute: AppProjectsRoute,
   AppReportsRoute: AppReportsRoute,
   AppTagsRoute: AppTagsRoute,
+  AppTasksRoute: AppTasksRoute,
   AppTeamsRoute: AppTeamsRoute,
-  AppTodosRoute: AppTodosRoute,
   AppTrackerRoute: AppTrackerRoute,
   AppIndexRoute: AppIndexRoute,
 }

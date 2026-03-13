@@ -1,6 +1,7 @@
 import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, sql } from "drizzle-orm";
 
 import { db } from "../client";
+import { task } from "../schema/task";
 import {
   client,
   trackerProject,
@@ -17,6 +18,9 @@ type EntryRow = {
   endAt: Date | null;
   projectId: number | null;
   projectName: string | null;
+  taskId: number | null;
+  taskTitle: string | null;
+  taskStatus: string | null;
 };
 
 type TrackerEntryRecord = {
@@ -26,6 +30,7 @@ type TrackerEntryRecord = {
   startAt: Date;
   endAt: Date | null;
   project: { id: number; name: string } | null;
+  task: { id: number; displayKey: string; title: string; status: string } | null;
   tags: Array<{ id: number; name: string }>;
 };
 
@@ -64,6 +69,15 @@ async function hydrateEntries(rows: EntryRow[]): Promise<TrackerEntryRecord[]> {
     startAt: row.startAt,
     endAt: row.endAt,
     project: row.projectId && row.projectName ? { id: row.projectId, name: row.projectName } : null,
+    task:
+      row.taskId && row.taskTitle && row.taskStatus
+        ? {
+            id: row.taskId,
+            displayKey: `TASK-${row.taskId}`,
+            title: row.taskTitle,
+            status: row.taskStatus,
+          }
+        : null,
     tags: tagsByEntryId.get(row.id) ?? [],
   }));
 }
@@ -225,9 +239,13 @@ export const timeTrackerRepository = {
         endAt: timeEntry.endAt,
         projectId: trackerProject.id,
         projectName: trackerProject.name,
+        taskId: task.id,
+        taskTitle: task.title,
+        taskStatus: task.status,
       })
       .from(timeEntry)
       .leftJoin(trackerProject, eq(timeEntry.projectId, trackerProject.id))
+      .leftJoin(task, eq(timeEntry.taskId, task.id))
       .where(
         and(
           eq(timeEntry.organizationId, organizationId),
@@ -252,9 +270,13 @@ export const timeTrackerRepository = {
         endAt: timeEntry.endAt,
         projectId: trackerProject.id,
         projectName: trackerProject.name,
+        taskId: task.id,
+        taskTitle: task.title,
+        taskStatus: task.status,
       })
       .from(timeEntry)
       .leftJoin(trackerProject, eq(timeEntry.projectId, trackerProject.id))
+      .leftJoin(task, eq(timeEntry.taskId, task.id))
       .where(
         and(
           eq(timeEntry.organizationId, organizationId),
@@ -272,7 +294,13 @@ export const timeTrackerRepository = {
   async startTimer(
     organizationId: string,
     userId: string,
-    input: { description: string; projectId: number | null; tagIds: number[]; isBillable: boolean },
+    input: {
+      description: string;
+      projectId: number | null;
+      taskId: number | null;
+      tagIds: number[];
+      isBillable: boolean;
+    },
     startedAt: Date,
   ) {
     await db
@@ -293,6 +321,7 @@ export const timeTrackerRepository = {
         userId,
         description: input.description,
         projectId: input.projectId,
+        taskId: input.taskId,
         isBillable: input.isBillable,
         startAt: startedAt,
       })
@@ -314,6 +343,7 @@ export const timeTrackerRepository = {
       entryId: number;
       description: string;
       projectId: number | null;
+      taskId: number | null;
       tagIds: number[];
       isBillable: boolean;
     },
@@ -323,6 +353,7 @@ export const timeTrackerRepository = {
       .set({
         description: input.description,
         projectId: input.projectId,
+        taskId: input.taskId,
         isBillable: input.isBillable,
       })
       .where(
@@ -383,6 +414,7 @@ export const timeTrackerRepository = {
     input: {
       description: string;
       projectId: number | null;
+      taskId: number | null;
       tagIds: number[];
       isBillable: boolean;
       startAt: Date;
@@ -396,6 +428,7 @@ export const timeTrackerRepository = {
         userId,
         description: input.description,
         projectId: input.projectId,
+        taskId: input.taskId,
         isBillable: input.isBillable,
         startAt: input.startAt,
         endAt: input.endAt,
@@ -418,6 +451,7 @@ export const timeTrackerRepository = {
       entryId: number;
       description: string;
       projectId: number | null;
+      taskId: number | null;
       tagIds: number[];
       isBillable: boolean;
       startAt: Date;
@@ -429,6 +463,7 @@ export const timeTrackerRepository = {
       .set({
         description: input.description,
         projectId: input.projectId,
+        taskId: input.taskId,
         isBillable: input.isBillable,
         startAt: input.startAt,
         endAt: input.endAt,

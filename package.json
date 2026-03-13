@@ -32,7 +32,8 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --filter=!@open-learn/infra",
+    "dev:cf": "turbo -F @open-learn/infra dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev",
@@ -42,7 +43,11 @@
     "db:generate": "turbo -F @open-learn/db db:generate",
     "db:migrate": "turbo -F @open-learn/db db:migrate",
     "deploy": "turbo -F @open-learn/infra deploy",
+    "deploy:dev": "turbo -F @open-learn/infra deploy:dev",
+    "deploy:prod": "turbo -F @open-learn/infra deploy:prod",
     "destroy": "turbo -F @open-learn/infra destroy",
+    "destroy:dev": "turbo -F @open-learn/infra destroy:dev",
+    "destroy:prod": "turbo -F @open-learn/infra destroy:prod",
     "check": "oxlint && oxfmt --write",
     "prepare": "husky"
   },

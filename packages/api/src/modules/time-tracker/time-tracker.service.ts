@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { timeTrackerRepository } from "@open-learn/db";
+import { taskRepository, timeTrackerRepository } from "@open-learn/db";
 
 import type {
   CreateManualEntryInput,
@@ -51,6 +51,7 @@ function mapEntry(entry: {
   startAt: Date;
   endAt: Date | null;
   project: { id: number; name: string } | null;
+  task: { id: number; displayKey: string; title: string; status: string } | null;
   tags: Array<{ id: number; name: string }>;
 }): TrackerEntry {
   return {
@@ -60,13 +61,22 @@ function mapEntry(entry: {
     startAt: entry.startAt.toISOString(),
     endAt: entry.endAt?.toISOString() ?? null,
     project: entry.project,
+    task: entry.task
+      ? {
+          id: entry.task.id,
+          displayKey: entry.task.displayKey,
+          title: entry.task.title,
+          status: entry.task.status as NonNullable<TrackerEntry["task"]>["status"],
+        }
+      : null,
     tags: entry.tags,
   };
 }
 
-async function validateProjectAndTags(
+async function validateProjectTaskAndTags(
   organizationId: string,
   projectId: number | null,
+  taskId: number | null,
   tagIds: number[],
 ) {
   const uniqueTagIds = [...new Set(tagIds)];
@@ -78,6 +88,24 @@ async function validateProjectAndTags(
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Selected project was not found",
+      });
+    }
+  }
+
+  if (taskId !== null) {
+    const task = await taskRepository.getTaskById(organizationId, taskId);
+
+    if (!task) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Selected task was not found",
+      });
+    }
+
+    if (projectId !== null && task.projectId !== projectId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Selected task must belong to the selected project",
       });
     }
   }
@@ -132,7 +160,12 @@ export const timeTrackerService = {
   },
 
   async startTimer(organizationId: string, userId: string, input: StartTimerInput) {
-    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectTaskAndTags(
+      organizationId,
+      input.projectId,
+      input.taskId,
+      input.tagIds,
+    );
 
     return timeTrackerRepository.startTimer(
       organizationId,
@@ -140,6 +173,7 @@ export const timeTrackerService = {
       {
         description: input.description.trim(),
         projectId: input.projectId,
+        taskId: input.taskId,
         tagIds,
         isBillable: input.isBillable,
       },
@@ -148,11 +182,17 @@ export const timeTrackerService = {
   },
 
   async updateActiveTimer(organizationId: string, userId: string, input: UpdateActiveTimerInput) {
-    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectTaskAndTags(
+      organizationId,
+      input.projectId,
+      input.taskId,
+      input.tagIds,
+    );
     const updatedEntry = await timeTrackerRepository.updateActiveTimer(organizationId, userId, {
       entryId: input.entryId,
       description: input.description.trim(),
       projectId: input.projectId,
+      taskId: input.taskId,
       tagIds,
       isBillable: input.isBillable,
     });
@@ -205,13 +245,19 @@ export const timeTrackerService = {
   async createManualEntry(organizationId: string, userId: string, input: CreateManualEntryInput) {
     const startAt = parseDate(input.startAt, "startAt");
     const endAt = parseDate(input.endAt, "endAt");
-    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectTaskAndTags(
+      organizationId,
+      input.projectId,
+      input.taskId,
+      input.tagIds,
+    );
 
     ensureChronologicalOrder(startAt, endAt);
 
     return timeTrackerRepository.createManualEntry(organizationId, userId, {
       description: input.description.trim(),
       projectId: input.projectId,
+      taskId: input.taskId,
       tagIds,
       isBillable: input.isBillable,
       startAt,
@@ -222,7 +268,12 @@ export const timeTrackerService = {
   async updateEntry(organizationId: string, userId: string, input: UpdateEntryInput) {
     const startAt = parseDate(input.startAt, "startAt");
     const endAt = parseDate(input.endAt, "endAt");
-    const tagIds = await validateProjectAndTags(organizationId, input.projectId, input.tagIds);
+    const tagIds = await validateProjectTaskAndTags(
+      organizationId,
+      input.projectId,
+      input.taskId,
+      input.tagIds,
+    );
 
     ensureChronologicalOrder(startAt, endAt);
 
@@ -230,6 +281,7 @@ export const timeTrackerService = {
       entryId: input.entryId,
       description: input.description.trim(),
       projectId: input.projectId,
+      taskId: input.taskId,
       tagIds,
       isBillable: input.isBillable,
       startAt,

@@ -1,0 +1,52 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare (dev)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy
+        run: bun run deploy:dev
+        working-directory: packages/infra
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+          # Secrets — same for dev and prod
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          POLAR_ACCESS_TOKEN: ${{ secrets.POLAR_ACCESS_TOKEN }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          # Dev-specific database
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
+          # Dev-specific non-sensitive config
+          CORS_ORIGIN: https://open-clock-web-dev.ludvig1411.workers.dev
+          BETTER_AUTH_URL: https://open-clock-server-dev.ludvig1411.workers.dev
+          POLAR_SUCCESS_URL: https://open-clock-web-dev.ludvig1411.workers.dev/success?checkout_id={CHECKOUT_ID}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+
+      - name: Save alchemy state
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/infra/.alchemy/dev/ 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore: update alchemy state [skip ci]"
+          git push

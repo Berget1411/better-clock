@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@open-learn/ui/components/tabs";
 
+import { useTasksQuery } from "@/features/tasks/services/queries";
 import { ActivityHistoryList } from "../components/activity-history-list";
 import { ManualEntryForm } from "../components/manual-entry-form";
 import { TimerEntryForm } from "../components/timer-entry-form";
@@ -13,6 +14,7 @@ export default function TimeTrackerPage() {
   const [expandedEntryId, setExpandedEntryId] = useState<number | null>(null);
   const range = useMemo(() => getTrackerOverviewRange(), []);
   const trackerOverview = useTrackerOverviewQuery(range);
+  const tasksQuery = useTasksQuery();
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -33,6 +35,7 @@ export default function TimeTrackerPage() {
           <TimerEntryForm
             activeEntry={trackerOverview.data?.activeEntry ?? null}
             projects={trackerOverview.data?.projects ?? []}
+            tasks={tasksQuery.data ?? []}
             tags={trackerOverview.data?.tags ?? []}
             range={range}
           />
@@ -41,6 +44,7 @@ export default function TimeTrackerPage() {
         <TabsContent value="manual">
           <ManualEntryForm
             projects={trackerOverview.data?.projects ?? []}
+            tasks={tasksQuery.data ?? []}
             tags={trackerOverview.data?.tags ?? []}
             range={range}
           />
@@ -50,11 +54,12 @@ export default function TimeTrackerPage() {
       <ActivityHistoryList
         entries={trackerOverview.data?.entries ?? []}
         projects={trackerOverview.data?.projects ?? []}
+        tasks={tasksQuery.data ?? []}
         tags={trackerOverview.data?.tags ?? []}
         range={range}
         expandedEntryId={expandedEntryId}
         onExpandedEntryChange={setExpandedEntryId}
-        isLoading={trackerOverview.isLoading}
+        isLoading={trackerOverview.isLoading || tasksQuery.isLoading}
       />
     </div>
   );

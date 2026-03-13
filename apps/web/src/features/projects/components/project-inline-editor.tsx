@@ -37,7 +37,7 @@ interface ProjectInlineEditorProps {
 export function ProjectInlineEditor({ project, onCancel }: ProjectInlineEditorProps) {
   const [name, setName] = useState(project.name);
   const [clientId, setClientId] = useState<string>(
-    project.clientId ? String(project.clientId) : "",
+    project.clientId ? String(project.clientId) : "none",
   );
   const [color, setColor] = useState(project.color ?? COLOR_PRESETS[0]);
   const [hourlyRate, setHourlyRate] = useState(project.hourlyRate ?? "");
@@ -54,7 +54,7 @@ export function ProjectInlineEditor({ project, onCancel }: ProjectInlineEditorPr
     await updateProject.mutateAsync({
       id: project.id,
       name: name.trim(),
-      clientId: clientId ? parseInt(clientId, 10) : null,
+      clientId: clientId && clientId !== "none" ? parseInt(clientId, 10) : null,
       color,
       hourlyRate: hourlyRate || null,
       access,
@@ -109,7 +109,7 @@ export function ProjectInlineEditor({ project, onCancel }: ProjectInlineEditorPr
             <SelectValue placeholder="No client" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No client</SelectItem>
+            <SelectItem value="none">No client</SelectItem>
             {(clients ?? []).map((c) => (
               <SelectItem key={c.id} value={String(c.id)}>
                 {c.name}

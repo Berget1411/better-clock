@@ -6,7 +6,7 @@
 - Prefer extending an existing feature over adding a new shared abstraction.
 - Keep transport thin, business logic in services, and DB access in `packages/db` repositories.
 - Do not edit generated files unless the generating workflow requires it.
-- For `apps/web`, always run react-doctor at end of assignment
+- For `apps/web`, always run react-doctor at end of implementing plan
 
 ## Where To Work
 

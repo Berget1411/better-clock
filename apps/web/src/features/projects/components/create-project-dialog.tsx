@@ -39,7 +39,7 @@ interface CreateProjectDialogProps {
 
 export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogProps) {
   const [name, setName] = useState("");
-  const [clientId, setClientId] = useState<string>("");
+  const [clientId, setClientId] = useState<string>("none");
   const [color, setColor] = useState(COLOR_PRESETS[0]);
   const [hourlyRate, setHourlyRate] = useState("");
   const [access, setAccess] = useState<"public" | "private" | "team">("public");
@@ -53,14 +53,14 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
 
     await createProject.mutateAsync({
       name: name.trim(),
-      clientId: clientId ? parseInt(clientId, 10) : null,
+      clientId: clientId && clientId !== "none" ? parseInt(clientId, 10) : null,
       color,
       hourlyRate: hourlyRate ? hourlyRate : null,
       access,
     });
 
     setName("");
-    setClientId("");
+    setClientId("none");
     setColor(COLOR_PRESETS[0]);
     setHourlyRate("");
     setAccess("public");
@@ -114,7 +114,7 @@ export function CreateProjectDialog({ open, onOpenChange }: CreateProjectDialogP
                 <SelectValue placeholder="No client" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No client</SelectItem>
+                <SelectItem value="none">No client</SelectItem>
                 {(clients ?? []).map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
                     {c.name}

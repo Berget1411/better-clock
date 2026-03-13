@@ -1,13 +1,14 @@
 import alchemy from "alchemy";
-import { Vite } from "alchemy/cloudflare";
-import { Worker } from "alchemy/cloudflare";
+import { CloudflareStateStore, Vite, Worker } from "alchemy/cloudflare";
 import { config } from "dotenv";
 
 config({ path: "./.env" });
 config({ path: "../../apps/web/.env" });
 config({ path: "../../apps/server/.env" });
 
-const app = await alchemy("open-clock");
+const app = await alchemy("open-clock", {
+  stateStore: process.env.CI ? (scope) => new CloudflareStateStore(scope) : undefined,
+});
 
 // Load stage-specific overrides after alchemy resolves the real stage.
 // `alchemy dev` (no --stage) resolves to $USER — no .env.$USER file exists,

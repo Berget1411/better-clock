@@ -38,12 +38,8 @@ lerna-debug.log*
 .turbo
 .nx
 
-# Better-T-Stack — ignore local alchemy state, track deployed stages
-.alchemy/
-!.alchemy/dev/
-!.alchemy/dev/**
-!.alchemy/prod/
-!.alchemy/prod/**
+# Better-T-Stack
+.alchemy
 
 # Testing
 coverage

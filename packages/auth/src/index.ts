@@ -15,6 +15,13 @@ const database: BetterAuthOptions["database"] = drizzleAdapter(db, {
   schema: schema,
 });
 
+// Derive shared parent domain for cross-subdomain cookies when deployed on workers.dev.
+// e.g. "https://open-clock-web-dev.ludvig1411.workers.dev" → ".ludvig1411.workers.dev"
+// Falls back to undefined for local development so cookies stay scoped to localhost.
+const workersDomain = env.CORS_ORIGIN.includes("workers.dev")
+  ? `.${new URL(env.CORS_ORIGIN).hostname.split(".").slice(-3).join(".")}`
+  : undefined;
+
 export const auth = betterAuth({
   database,
   trustedOrigins: [env.CORS_ORIGIN],
@@ -31,13 +38,12 @@ export const auth = betterAuth({
       clientSecret: env.GITHUB_CLIENT_SECRET,
     },
   },
-  // uncomment cookieCache setting when ready to deploy to Cloudflare using *.workers.dev domains
-  // session: {
-  //   cookieCache: {
-  //     enabled: true,
-  //     maxAge: 60,
-  //   },
-  // },
+  session: {
+    cookieCache: {
+      enabled: !!workersDomain,
+      maxAge: 60,
+    },
+  },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   advanced: {
@@ -46,12 +52,12 @@ export const auth = betterAuth({
       secure: true,
       httpOnly: true,
     },
-    // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
-    // https://developers.cloudflare.com/workers/wrangler/configuration/#workersdev
-    // crossSubDomainCookies: {
-    //   enabled: true,
-    //   domain: "<your-workers-subdomain>",
-    // },
+    ...(workersDomain && {
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: workersDomain,
+      },
+    }),
   },
   plugins: [
     organization({

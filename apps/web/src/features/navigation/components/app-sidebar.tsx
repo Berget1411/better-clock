@@ -51,11 +51,6 @@ const navMainItems = [
     icon: CalendarIcon,
   },
   {
-    title: "Kanban",
-    to: "/kanban",
-    icon: KanbanIcon,
-  },
-  {
     title: "AI Chat",
     to: "/ai",
     icon: BotIcon,

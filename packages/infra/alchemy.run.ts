@@ -11,7 +11,7 @@ const app = await alchemy("open-clock", {
   stateStore: (scope) => new CloudflareStateStore(scope),
 });
 
-// Load stage-specific overrides after alchemy resolves the real stage.
+// NOTE: Load stage-specific overrides after alchemy resolves the real stage.
 // `alchemy dev` (no --stage) resolves to $USER — no .env.$USER file exists,
 // so localhost values from apps/server/.env are preserved.
 // `alchemy deploy --stage dev/prod` resolves to "dev"/"prod" and loads the

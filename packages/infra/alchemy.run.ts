@@ -8,8 +8,7 @@ config({ path: "../../apps/web/.env" });
 config({ path: "../../apps/server/.env" });
 
 const app = await alchemy("open-clock", {
-  password: process.env.ALCHEMY_PASSWORD,
-  stateStore: process.env.CI ? (scope) => new CloudflareStateStore(scope) : undefined,
+  stateStore: (scope) => new CloudflareStateStore(scope),
 });
 
 // NOTE: Load stage-specific overrides after alchemy resolves the real stage.

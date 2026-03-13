@@ -1,6 +1,7 @@
 import type { TaskPriority, TaskStatus } from "@open-learn/api/modules/task/task.schema";
+import type { TrackerProjectFull } from "@open-learn/api/modules/time-tracker/time-tracker.schema";
 
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { FolderIcon, PlusIcon, SearchIcon } from "lucide-react";
 
 import { Button } from "@open-learn/ui/components/button";
 import {
@@ -25,10 +26,13 @@ import {
 interface TaskTableToolbarProps {
   search: string;
   onSearchChange: (value: string) => void;
+  projects: TrackerProjectFull[];
   selectedStatuses: TaskStatus[];
   selectedPriorities: TaskPriority[];
+  selectedProjectIds: number[];
   onToggleStatus: (status: TaskStatus) => void;
   onTogglePriority: (priority: TaskPriority) => void;
+  onToggleProject: (projectId: number) => void;
   onAddTask: () => void;
 }
 
@@ -39,10 +43,13 @@ function getFilterLabel(label: string, count: number) {
 export function TaskTableToolbar({
   search,
   onSearchChange,
+  projects,
   selectedStatuses,
   selectedPriorities,
+  selectedProjectIds,
   onToggleStatus,
   onTogglePriority,
+  onToggleProject,
   onAddTask,
 }: TaskTableToolbarProps) {
   return (
@@ -111,6 +118,36 @@ export function TaskTableToolbar({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => selectedPriorities.forEach(onTogglePriority)}>
+                  Clear filters
+                </DropdownMenuItem>
+              </>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-1.5">
+              <FolderIcon className="size-3.5" />
+              {getFilterLabel("Project", selectedProjectIds.length)}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="max-h-80 w-56 overflow-y-auto">
+            <DropdownMenuLabel>Filter by project</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {projects.map((project) => (
+              <DropdownMenuCheckboxItem
+                key={project.id}
+                checked={selectedProjectIds.includes(project.id)}
+                onCheckedChange={() => onToggleProject(project.id)}
+              >
+                {project.name}
+              </DropdownMenuCheckboxItem>
+            ))}
+            {selectedProjectIds.length > 0 ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => selectedProjectIds.forEach(onToggleProject)}>
                   Clear filters
                 </DropdownMenuItem>
               </>

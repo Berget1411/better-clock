@@ -1,8 +1,8 @@
 import type { TaskPriority, TaskStatus, TaskType } from "@open-learn/api/modules/task/task.schema";
 
 export const TASK_COPY = {
-  pageTitle: "Welcome back!",
-  pageDescription: "Here's a list of your tasks for this month.",
+  pageTitle: "Tasks",
+  pageDescription: "Track work items, link them to projects, and follow progress.",
   searchPlaceholder: "Filter tasks...",
   addTask: "Add Task",
   addTaskTitle: "Add task",

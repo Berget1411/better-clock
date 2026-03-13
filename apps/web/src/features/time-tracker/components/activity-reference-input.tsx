@@ -18,6 +18,7 @@ interface ActivityReferenceInputProps {
     id?: string;
   };
   taskId: number | null;
+  projectId: number | null;
   onTaskChange: (value: number | null) => void;
   tasks: TaskListItem[];
 }
@@ -27,6 +28,7 @@ export function ActivityReferenceInput({
   onModeChange,
   description,
   taskId,
+  projectId,
   onTaskChange,
   tasks,
 }: ActivityReferenceInputProps) {
@@ -59,7 +61,12 @@ export function ActivityReferenceInput({
 
       <div className="min-w-0 flex-1">
         {mode === "task" ? (
-          <CompactTaskPicker value={taskId} onChange={onTaskChange} tasks={tasks} />
+          <CompactTaskPicker
+            value={taskId}
+            onChange={onTaskChange}
+            tasks={tasks}
+            projectId={projectId}
+          />
         ) : (
           <Input
             id={description.id}

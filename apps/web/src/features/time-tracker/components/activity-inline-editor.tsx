@@ -15,6 +15,7 @@ import { FieldError } from "@open-learn/ui/components/field";
 import { Input } from "@open-learn/ui/components/input";
 
 import { useDeleteEntry, useUpdateEntry } from "../services/mutations";
+import { getCompatibleTaskId } from "../utils/task-reference";
 import {
   combineDateAndTime,
   formatDuration,
@@ -144,6 +145,7 @@ export function ActivityInlineEditor({
                               placeholder: "Add a description (optional)",
                             }}
                             taskId={taskField.state.value}
+                            projectId={values.projectId}
                             onTaskChange={taskField.handleChange}
                             tasks={tasks}
                           />
@@ -152,12 +154,21 @@ export function ActivityInlineEditor({
 
                       <form.Field name="projectId">
                         {(projectField) => (
-                          <CompactProjectPicker
-                            value={projectField.state.value}
-                            onChange={projectField.handleChange}
-                            projects={projects}
-                            range={range}
-                          />
+                          <form.Field name="taskId">
+                            {(taskField) => (
+                              <CompactProjectPicker
+                                value={projectField.state.value}
+                                onChange={(projectId) => {
+                                  projectField.handleChange(projectId);
+                                  taskField.handleChange(
+                                    getCompatibleTaskId(tasks, taskField.state.value, projectId),
+                                  );
+                                }}
+                                projects={projects}
+                                range={range}
+                              />
+                            )}
+                          </form.Field>
                         )}
                       </form.Field>
 

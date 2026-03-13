@@ -76,7 +76,7 @@ export const createProjectInputSchema = z.object({
   color: z.string().trim().max(20).nullable().optional(),
   hourlyRate: z
     .string()
-    .regex(/^d+(.d{1,2})?$/)
+    .regex(/^\d+(\.\d{1,2})?$/)
     .nullable()
     .optional(),
   access: z.enum(["public", "private", "team"]).optional().default("public"),
@@ -96,7 +96,7 @@ export const updateProjectInputSchema = z.object({
   color: z.string().trim().max(20).nullable().optional(),
   hourlyRate: z
     .string()
-    .regex(/^d+(.d{1,2})?$/)
+    .regex(/^\d+(\.\d{1,2})?$/)
     .nullable()
     .optional(),
   isArchived: z.boolean().optional(),

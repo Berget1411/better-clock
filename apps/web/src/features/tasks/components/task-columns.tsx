@@ -146,6 +146,19 @@ export function getTaskColumns({
       size: 160,
     },
     {
+      accessorKey: "projectId",
+      header: () => null,
+      cell: () => null,
+      enableHiding: true,
+      filterFn: (row, _columnId, value) => {
+        if (!Array.isArray(value) || value.length === 0) {
+          return true;
+        }
+
+        return value.includes(row.original.projectId);
+      },
+    },
+    {
       accessorKey: "updatedAt",
       header: () => null,
       cell: () => null,

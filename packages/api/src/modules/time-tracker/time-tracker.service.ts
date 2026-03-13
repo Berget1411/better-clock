@@ -101,6 +101,13 @@ async function validateProjectTaskAndTags(
         message: "Selected task was not found",
       });
     }
+
+    if (projectId !== null && task.projectId !== projectId) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Selected task must belong to the selected project",
+      });
+    }
   }
 
   if (uniqueTagIds.length) {

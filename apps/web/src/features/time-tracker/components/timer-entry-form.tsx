@@ -16,6 +16,7 @@ import { FieldError } from "@open-learn/ui/components/field";
 
 import { useStartTimer, useStopTimer, useUpdateActiveTimer } from "../services/mutations";
 import { formatDuration, getElapsedSeconds, getTimerFormValues } from "../utils/date-time";
+import { getCompatibleTaskId } from "../utils/task-reference";
 import { ActivityReferenceInput } from "./activity-reference-input";
 import { BillableBadge } from "./billable-badge";
 import { CompactBillableToggle } from "./compact-billable-toggle";
@@ -118,60 +119,30 @@ export function TimerEntryForm({ activeEntry, projects, tasks, tags, range }: Ti
             return (
               <>
                 <div className="flex flex-col gap-2 rounded-none border bg-card p-2 md:flex-row md:items-center md:gap-2">
-                  <form.Field name="taskId">
-                    {(taskField) => (
-                      <ActivityReferenceInput
-                        mode={activityMode}
-                        onModeChange={setActivityMode}
-                        description={{
-                          id: "tracker-description",
-                          value: descriptionField.state.value,
-                          onBlur: descriptionField.handleBlur,
-                          onChange: descriptionField.handleChange,
-                          isInvalid,
-                          placeholder: "What are you working on? (optional)",
-                        }}
-                        taskId={taskField.state.value}
-                        onTaskChange={taskField.handleChange}
-                        tasks={tasks}
-                      />
+                  <form.Subscribe selector={(state) => state.values.projectId}>
+                    {(projectId) => (
+                      <form.Field name="taskId">
+                        {(taskField) => (
+                          <ActivityReferenceInput
+                            mode={activityMode}
+                            onModeChange={setActivityMode}
+                            description={{
+                              id: "tracker-description",
+                              value: descriptionField.state.value,
+                              onBlur: descriptionField.handleBlur,
+                              onChange: descriptionField.handleChange,
+                              isInvalid,
+                              placeholder: "What are you working on? (optional)",
+                            }}
+                            taskId={taskField.state.value}
+                            projectId={projectId}
+                            onTaskChange={taskField.handleChange}
+                            tasks={tasks}
+                          />
+                        )}
+                      </form.Field>
                     )}
-                  </form.Field>
-
-                  {!activeEntry ? (
-                    <>
-                      <form.Field name="projectId">
-                        {(projectField) => (
-                          <CompactProjectPicker
-                            value={projectField.state.value}
-                            onChange={projectField.handleChange}
-                            projects={projects}
-                            range={range}
-                          />
-                        )}
-                      </form.Field>
-
-                      <form.Field name="tagIds">
-                        {(tagField) => (
-                          <CompactTagPicker
-                            value={tagField.state.value}
-                            onChange={tagField.handleChange}
-                            tags={tags}
-                            range={range}
-                          />
-                        )}
-                      </form.Field>
-
-                      <form.Field name="isBillable">
-                        {(billableField) => (
-                          <CompactBillableToggle
-                            checked={billableField.state.value}
-                            onCheckedChange={billableField.handleChange}
-                          />
-                        )}
-                      </form.Field>
-                    </>
-                  ) : null}
+                  </form.Subscribe>
 
                   {activeEntry ? <BillableBadge isBillable={activeEntry.isBillable} /> : null}
 
@@ -196,16 +167,15 @@ export function TimerEntryForm({ activeEntry, projects, tasks, tags, range }: Ti
                     )}
                   </form.Subscribe>
 
-                  {activeEntry ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDetailsOpen((open) => !open)}
-                    >
-                      {detailsOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                    </Button>
-                  ) : null}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setDetailsOpen((open) => !open)}
+                    aria-label={detailsOpen ? "Hide timer details" : "Edit timer details"}
+                  >
+                    {detailsOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                  </Button>
                 </div>
 
                 <div className="px-2">
@@ -216,42 +186,49 @@ export function TimerEntryForm({ activeEntry, projects, tasks, tags, range }: Ti
           }}
         </form.Field>
 
-        {activeEntry ? (
-          <CollapsibleContent className="grid gap-2 rounded-none border bg-card p-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <form.Field name="projectId">
-                {(projectField) => (
-                  <CompactProjectPicker
-                    value={projectField.state.value}
-                    onChange={projectField.handleChange}
-                    projects={projects}
-                    range={range}
-                  />
-                )}
-              </form.Field>
+        <CollapsibleContent className="grid gap-2 rounded-none border bg-card p-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <form.Field name="projectId">
+              {(projectField) => (
+                <form.Field name="taskId">
+                  {(taskField) => (
+                    <CompactProjectPicker
+                      value={projectField.state.value}
+                      onChange={(projectId) => {
+                        projectField.handleChange(projectId);
+                        taskField.handleChange(
+                          getCompatibleTaskId(tasks, taskField.state.value, projectId),
+                        );
+                      }}
+                      projects={projects}
+                      range={range}
+                    />
+                  )}
+                </form.Field>
+              )}
+            </form.Field>
 
-              <form.Field name="tagIds">
-                {(tagField) => (
-                  <CompactTagPicker
-                    value={tagField.state.value}
-                    onChange={tagField.handleChange}
-                    tags={tags}
-                    range={range}
-                  />
-                )}
-              </form.Field>
+            <form.Field name="tagIds">
+              {(tagField) => (
+                <CompactTagPicker
+                  value={tagField.state.value}
+                  onChange={tagField.handleChange}
+                  tags={tags}
+                  range={range}
+                />
+              )}
+            </form.Field>
 
-              <form.Field name="isBillable">
-                {(billableField) => (
-                  <CompactBillableToggle
-                    checked={billableField.state.value}
-                    onCheckedChange={billableField.handleChange}
-                  />
-                )}
-              </form.Field>
-            </div>
-          </CollapsibleContent>
-        ) : null}
+            <form.Field name="isBillable">
+              {(billableField) => (
+                <CompactBillableToggle
+                  checked={billableField.state.value}
+                  onCheckedChange={billableField.handleChange}
+                />
+              )}
+            </form.Field>
+          </div>
+        </CollapsibleContent>
       </form>
     </Collapsible>
   );

@@ -67,7 +67,7 @@ function TasksTableSkeleton() {
   );
 }
 
-function toggleFilterValue<TValue extends string>(values: TValue[], value: TValue) {
+function toggleFilterValue<TValue extends string | number>(values: TValue[], value: TValue) {
   return values.includes(value) ? values.filter((entry) => entry !== value) : [...values, value];
 }
 
@@ -75,6 +75,7 @@ export function TasksTable({ tasks, projects, isLoading }: TasksTableProps) {
   const [search, setSearch] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<TaskStatus[]>([]);
   const [selectedPriorities, setSelectedPriorities] = useState<TaskPriority[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "updatedAt", desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [createOpen, setCreateOpen] = useState(false);
@@ -84,8 +85,9 @@ export function TasksTable({ tasks, projects, isLoading }: TasksTableProps) {
     () => [
       { id: "status", value: selectedStatuses },
       { id: "priority", value: selectedPriorities },
+      { id: "projectId", value: selectedProjectIds },
     ],
-    [selectedPriorities, selectedStatuses],
+    [selectedPriorities, selectedProjectIds, selectedStatuses],
   );
 
   const columns = useMemo(
@@ -105,6 +107,7 @@ export function TasksTable({ tasks, projects, isLoading }: TasksTableProps) {
       rowSelection,
       columnFilters,
       columnVisibility: {
+        projectId: false,
         updatedAt: false,
       },
     },
@@ -155,13 +158,18 @@ export function TasksTable({ tasks, projects, isLoading }: TasksTableProps) {
         <TaskTableToolbar
           search={search}
           onSearchChange={setSearch}
+          projects={projects}
           selectedStatuses={selectedStatuses}
           selectedPriorities={selectedPriorities}
+          selectedProjectIds={selectedProjectIds}
           onToggleStatus={(status) =>
             setSelectedStatuses((current) => toggleFilterValue(current, status))
           }
           onTogglePriority={(priority) =>
             setSelectedPriorities((current) => toggleFilterValue(current, priority))
+          }
+          onToggleProject={(projectId) =>
+            setSelectedProjectIds((current) => toggleFilterValue(current, projectId))
           }
           onAddTask={() => setCreateOpen(true)}
         />

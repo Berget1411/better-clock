@@ -15,29 +15,36 @@ import {
 } from "@open-learn/ui/components/popover";
 import { cn } from "@open-learn/ui/lib/utils";
 
+import { filterTasksByProject } from "../utils/task-reference";
+
 interface CompactTaskPickerProps {
   value: number | null;
   onChange: (value: number | null) => void;
   tasks: TaskListItem[];
+  projectId: number | null;
 }
 
-export function CompactTaskPicker({ value, onChange, tasks }: CompactTaskPickerProps) {
+export function CompactTaskPicker({ value, onChange, tasks, projectId }: CompactTaskPickerProps) {
   const [search, setSearch] = useState("");
   const selectedTask = tasks.find((task) => task.id === value) ?? null;
+  const projectScopedTasks = useMemo(
+    () => filterTasksByProject(tasks, projectId),
+    [projectId, tasks],
+  );
 
   const filteredTasks = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
     if (!normalizedSearch) {
-      return tasks;
+      return projectScopedTasks;
     }
 
-    return tasks.filter((task) =>
+    return projectScopedTasks.filter((task) =>
       [task.displayKey, task.title, task.projectName]
         .filter(Boolean)
         .some((entry) => String(entry).toLowerCase().includes(normalizedSearch)),
     );
-  }, [search, tasks]);
+  }, [projectScopedTasks, search]);
 
   return (
     <Popover>
@@ -56,7 +63,11 @@ export function CompactTaskPicker({ value, onChange, tasks }: CompactTaskPickerP
       <PopoverContent align="start" className="w-96">
         <PopoverHeader>
           <PopoverTitle>Task reference</PopoverTitle>
-          <PopoverDescription>Link this activity to an existing task.</PopoverDescription>
+          <PopoverDescription>
+            {projectId === null
+              ? "Link this activity to an existing task."
+              : "Link this activity to a task from the selected project."}
+          </PopoverDescription>
         </PopoverHeader>
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -103,7 +114,7 @@ export function CompactTaskPicker({ value, onChange, tasks }: CompactTaskPickerP
             ))
           ) : (
             <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-              No matching tasks.
+              {projectId === null ? "No matching tasks." : "No matching tasks in this project."}
             </div>
           )}
         </div>

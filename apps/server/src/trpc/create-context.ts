@@ -11,9 +11,16 @@ export async function createContext({ context }: CreateContextOptions): Promise<
     headers: context.req.raw.headers,
   });
 
-  // Read the token directly from the session object — avoids hardcoding the
-  // cookie name which changes when crossSubDomainCookies / __Secure- prefix is active.
-  const sessionToken = session?.session.token ?? null;
+  // Extract session token so tRPC procedures can make Better Auth API calls on behalf of the user
+  const cookieHeader = context.req.header("cookie") ?? "";
+  const sessionToken =
+    cookieHeader
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("better-auth.session_token="))
+      ?.split("=")
+      .slice(1)
+      .join("=") ?? null;
 
   return {
     session,

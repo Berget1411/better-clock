@@ -8,309 +8,310 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as SuccessRouteImport } from "./routes/success";
-import { Route as LoginRouteImport } from "./routes/login";
-import { Route as HomeRouteImport } from "./routes/home";
-import { Route as AppRouteImport } from "./routes/_app";
-import { Route as AppIndexRouteImport } from "./routes/_app.index";
-import { Route as AcceptInvitationInvitationIdRouteImport } from "./routes/accept-invitation.$invitationId";
-import { Route as AppTrackerRouteImport } from "./routes/_app.tracker";
-import { Route as AppTeamsRouteImport } from "./routes/_app.teams";
-import { Route as AppTasksRouteImport } from "./routes/_app.tasks";
-import { Route as AppTagsRouteImport } from "./routes/_app.tags";
-import { Route as AppReportsRouteImport } from "./routes/_app.reports";
-import { Route as AppProjectsRouteImport } from "./routes/_app.projects";
-import { Route as AppClientsRouteImport } from "./routes/_app.clients";
-import { Route as AppAiRouteImport } from "./routes/_app.ai";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AcceptInvitationInvitationIdRouteImport } from './routes/accept-invitation.$invitationId'
+import { Route as AppTrackerRouteImport } from './routes/_app.tracker'
+import { Route as AppTeamsRouteImport } from './routes/_app.teams'
+import { Route as AppTasksRouteImport } from './routes/_app.tasks'
+import { Route as AppTagsRouteImport } from './routes/_app.tags'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppProjectsRouteImport } from './routes/_app.projects'
+import { Route as AppClientsRouteImport } from './routes/_app.clients'
+import { Route as AppAiRouteImport } from './routes/_app.ai'
 
 const SuccessRoute = SuccessRouteImport.update({
-  id: "/success",
-  path: "/success",
+  id: '/success',
+  path: '/success',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const HomeRoute = HomeRouteImport.update({
-  id: "/home",
-  path: "/home",
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AppRoute = AppRouteImport.update({
-  id: "/_app",
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AppRoute,
-} as any);
-const AcceptInvitationInvitationIdRoute = AcceptInvitationInvitationIdRouteImport.update({
-  id: "/accept-invitation/$invitationId",
-  path: "/accept-invitation/$invitationId",
-  getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
+const AcceptInvitationInvitationIdRoute =
+  AcceptInvitationInvitationIdRouteImport.update({
+    id: '/accept-invitation/$invitationId',
+    path: '/accept-invitation/$invitationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppTrackerRoute = AppTrackerRouteImport.update({
-  id: "/tracker",
-  path: "/tracker",
+  id: '/tracker',
+  path: '/tracker',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppTeamsRoute = AppTeamsRouteImport.update({
-  id: "/teams",
-  path: "/teams",
+  id: '/teams',
+  path: '/teams',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppTasksRoute = AppTasksRouteImport.update({
-  id: "/tasks",
-  path: "/tasks",
+  id: '/tasks',
+  path: '/tasks',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppTagsRoute = AppTagsRouteImport.update({
-  id: "/tags",
-  path: "/tags",
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppReportsRoute = AppReportsRouteImport.update({
-  id: "/reports",
-  path: "/reports",
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
-  id: "/projects",
-  path: "/projects",
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppClientsRoute = AppClientsRouteImport.update({
-  id: "/clients",
-  path: "/clients",
+  id: '/clients',
+  path: '/clients',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 const AppAiRoute = AppAiRouteImport.update({
-  id: "/ai",
-  path: "/ai",
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => AppRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof AppIndexRoute;
-  "/home": typeof HomeRoute;
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/ai": typeof AppAiRoute;
-  "/clients": typeof AppClientsRoute;
-  "/projects": typeof AppProjectsRoute;
-  "/reports": typeof AppReportsRoute;
-  "/tags": typeof AppTagsRoute;
-  "/tasks": typeof AppTasksRoute;
-  "/teams": typeof AppTeamsRoute;
-  "/tracker": typeof AppTrackerRoute;
-  "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
+  '/': typeof AppIndexRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/ai': typeof AppAiRoute
+  '/clients': typeof AppClientsRoute
+  '/projects': typeof AppProjectsRoute
+  '/reports': typeof AppReportsRoute
+  '/tags': typeof AppTagsRoute
+  '/tasks': typeof AppTasksRoute
+  '/teams': typeof AppTeamsRoute
+  '/tracker': typeof AppTrackerRoute
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
 }
 export interface FileRoutesByTo {
-  "/home": typeof HomeRoute;
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/ai": typeof AppAiRoute;
-  "/clients": typeof AppClientsRoute;
-  "/projects": typeof AppProjectsRoute;
-  "/reports": typeof AppReportsRoute;
-  "/tags": typeof AppTagsRoute;
-  "/tasks": typeof AppTasksRoute;
-  "/teams": typeof AppTeamsRoute;
-  "/tracker": typeof AppTrackerRoute;
-  "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
-  "/": typeof AppIndexRoute;
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/ai': typeof AppAiRoute
+  '/clients': typeof AppClientsRoute
+  '/projects': typeof AppProjectsRoute
+  '/reports': typeof AppReportsRoute
+  '/tags': typeof AppTagsRoute
+  '/tasks': typeof AppTasksRoute
+  '/teams': typeof AppTeamsRoute
+  '/tracker': typeof AppTrackerRoute
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/_app": typeof AppRouteWithChildren;
-  "/home": typeof HomeRoute;
-  "/login": typeof LoginRoute;
-  "/success": typeof SuccessRoute;
-  "/_app/ai": typeof AppAiRoute;
-  "/_app/clients": typeof AppClientsRoute;
-  "/_app/projects": typeof AppProjectsRoute;
-  "/_app/reports": typeof AppReportsRoute;
-  "/_app/tags": typeof AppTagsRoute;
-  "/_app/tasks": typeof AppTasksRoute;
-  "/_app/teams": typeof AppTeamsRoute;
-  "/_app/tracker": typeof AppTrackerRoute;
-  "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
-  "/_app/": typeof AppIndexRoute;
+  __root__: typeof rootRouteImport
+  '/_app': typeof AppRouteWithChildren
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/success': typeof SuccessRoute
+  '/_app/ai': typeof AppAiRoute
+  '/_app/clients': typeof AppClientsRoute
+  '/_app/projects': typeof AppProjectsRoute
+  '/_app/reports': typeof AppReportsRoute
+  '/_app/tags': typeof AppTagsRoute
+  '/_app/tasks': typeof AppTasksRoute
+  '/_app/teams': typeof AppTeamsRoute
+  '/_app/tracker': typeof AppTrackerRoute
+  '/accept-invitation/$invitationId': typeof AcceptInvitationInvitationIdRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/home"
-    | "/login"
-    | "/success"
-    | "/ai"
-    | "/clients"
-    | "/projects"
-    | "/reports"
-    | "/tags"
-    | "/tasks"
-    | "/teams"
-    | "/tracker"
-    | "/accept-invitation/$invitationId";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/home'
+    | '/login'
+    | '/success'
+    | '/ai'
+    | '/clients'
+    | '/projects'
+    | '/reports'
+    | '/tags'
+    | '/tasks'
+    | '/teams'
+    | '/tracker'
+    | '/accept-invitation/$invitationId'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/home"
-    | "/login"
-    | "/success"
-    | "/ai"
-    | "/clients"
-    | "/projects"
-    | "/reports"
-    | "/tags"
-    | "/tasks"
-    | "/teams"
-    | "/tracker"
-    | "/accept-invitation/$invitationId"
-    | "/";
+    | '/home'
+    | '/login'
+    | '/success'
+    | '/ai'
+    | '/clients'
+    | '/projects'
+    | '/reports'
+    | '/tags'
+    | '/tasks'
+    | '/teams'
+    | '/tracker'
+    | '/accept-invitation/$invitationId'
+    | '/'
   id:
-    | "__root__"
-    | "/_app"
-    | "/home"
-    | "/login"
-    | "/success"
-    | "/_app/ai"
-    | "/_app/clients"
-    | "/_app/projects"
-    | "/_app/reports"
-    | "/_app/tags"
-    | "/_app/tasks"
-    | "/_app/teams"
-    | "/_app/tracker"
-    | "/accept-invitation/$invitationId"
-    | "/_app/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/_app'
+    | '/home'
+    | '/login'
+    | '/success'
+    | '/_app/ai'
+    | '/_app/clients'
+    | '/_app/projects'
+    | '/_app/reports'
+    | '/_app/tags'
+    | '/_app/tasks'
+    | '/_app/teams'
+    | '/_app/tracker'
+    | '/accept-invitation/$invitationId'
+    | '/_app/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AppRoute: typeof AppRouteWithChildren;
-  HomeRoute: typeof HomeRoute;
-  LoginRoute: typeof LoginRoute;
-  SuccessRoute: typeof SuccessRoute;
-  AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute;
+  AppRoute: typeof AppRouteWithChildren
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
+  SuccessRoute: typeof SuccessRoute
+  AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/success": {
-      id: "/success";
-      path: "/success";
-      fullPath: "/success";
-      preLoaderRoute: typeof SuccessRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/login": {
-      id: "/login";
-      path: "/login";
-      fullPath: "/login";
-      preLoaderRoute: typeof LoginRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/home": {
-      id: "/home";
-      path: "/home";
-      fullPath: "/home";
-      preLoaderRoute: typeof HomeRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_app": {
-      id: "/_app";
-      path: "";
-      fullPath: "/";
-      preLoaderRoute: typeof AppRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_app/": {
-      id: "/_app/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof AppIndexRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/accept-invitation/$invitationId": {
-      id: "/accept-invitation/$invitationId";
-      path: "/accept-invitation/$invitationId";
-      fullPath: "/accept-invitation/$invitationId";
-      preLoaderRoute: typeof AcceptInvitationInvitationIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/_app/tracker": {
-      id: "/_app/tracker";
-      path: "/tracker";
-      fullPath: "/tracker";
-      preLoaderRoute: typeof AppTrackerRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/teams": {
-      id: "/_app/teams";
-      path: "/teams";
-      fullPath: "/teams";
-      preLoaderRoute: typeof AppTeamsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/tasks": {
-      id: "/_app/tasks";
-      path: "/tasks";
-      fullPath: "/tasks";
-      preLoaderRoute: typeof AppTasksRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/tags": {
-      id: "/_app/tags";
-      path: "/tags";
-      fullPath: "/tags";
-      preLoaderRoute: typeof AppTagsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/reports": {
-      id: "/_app/reports";
-      path: "/reports";
-      fullPath: "/reports";
-      preLoaderRoute: typeof AppReportsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/projects": {
-      id: "/_app/projects";
-      path: "/projects";
-      fullPath: "/projects";
-      preLoaderRoute: typeof AppProjectsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/clients": {
-      id: "/_app/clients";
-      path: "/clients";
-      fullPath: "/clients";
-      preLoaderRoute: typeof AppClientsRouteImport;
-      parentRoute: typeof AppRoute;
-    };
-    "/_app/ai": {
-      id: "/_app/ai";
-      path: "/ai";
-      fullPath: "/ai";
-      preLoaderRoute: typeof AppAiRouteImport;
-      parentRoute: typeof AppRoute;
-    };
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/accept-invitation/$invitationId': {
+      id: '/accept-invitation/$invitationId'
+      path: '/accept-invitation/$invitationId'
+      fullPath: '/accept-invitation/$invitationId'
+      preLoaderRoute: typeof AcceptInvitationInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/tracker': {
+      id: '/_app/tracker'
+      path: '/tracker'
+      fullPath: '/tracker'
+      preLoaderRoute: typeof AppTrackerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/teams': {
+      id: '/_app/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof AppTeamsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tasks': {
+      id: '/_app/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AppTasksRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tags': {
+      id: '/_app/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof AppTagsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects': {
+      id: '/_app/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AppProjectsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clients': {
+      id: '/_app/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof AppClientsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai': {
+      id: '/_app/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AppAiRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
-  AppAiRoute: typeof AppAiRoute;
-  AppClientsRoute: typeof AppClientsRoute;
-  AppProjectsRoute: typeof AppProjectsRoute;
-  AppReportsRoute: typeof AppReportsRoute;
-  AppTagsRoute: typeof AppTagsRoute;
-  AppTasksRoute: typeof AppTasksRoute;
-  AppTeamsRoute: typeof AppTeamsRoute;
-  AppTrackerRoute: typeof AppTrackerRoute;
-  AppIndexRoute: typeof AppIndexRoute;
+  AppAiRoute: typeof AppAiRoute
+  AppClientsRoute: typeof AppClientsRoute
+  AppProjectsRoute: typeof AppProjectsRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppTagsRoute: typeof AppTagsRoute
+  AppTasksRoute: typeof AppTasksRoute
+  AppTeamsRoute: typeof AppTeamsRoute
+  AppTrackerRoute: typeof AppTrackerRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -323,9 +324,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppTeamsRoute: AppTeamsRoute,
   AppTrackerRoute: AppTrackerRoute,
   AppIndexRoute: AppIndexRoute,
-};
+}
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren);
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
@@ -333,7 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SuccessRoute: SuccessRoute,
   AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()

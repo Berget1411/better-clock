@@ -51,7 +51,7 @@ export const web = await Vite("web", {
   assets: "dist",
   bindings: {
     VITE_SERVER_URL: server.url,
-    VITE_AI_ENABLED: alchemy.env.VITE_AI_ENABLED ?? "false",
+    VITE_AI_ENABLED: process.env.VITE_AI_ENABLED ?? "false",
     DEV_PORT: "3001",
   },
 });

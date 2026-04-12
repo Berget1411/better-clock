@@ -15,9 +15,28 @@ const database: BetterAuthOptions["database"] = drizzleAdapter(db, {
   schema: schema,
 });
 
+// Derive shared parent domain for cross-subdomain cookies when deployed on workers.dev.
+// e.g. "https://open-clock-web-dev.ludvig1411.workers.dev" → ".ludvig1411.workers.dev"
+// Falls back to undefined for local development so cookies stay scoped to localhost.
+const workersDomain = env.CORS_ORIGIN.includes("workers.dev")
+  ? `.${new URL(env.CORS_ORIGIN).hostname.split(".").slice(-3).join(".")}`
+  : undefined;
+
+// Build the list of trusted origins. Always include the primary CORS_ORIGIN.
+// During local dev the web worker binds VITE_SERVER_URL to localhost:3002 and
+// the browser reaches it from localhost:3001/3003, so we also trust localhost
+// variants to avoid 403 preflight failures against the deployed dev server.
+const trustedOrigins = [
+  env.CORS_ORIGIN,
+  // localhost variants for local development
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+];
+
 export const auth = betterAuth({
   database,
-  trustedOrigins: [env.CORS_ORIGIN],
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
   },
@@ -31,13 +50,12 @@ export const auth = betterAuth({
       clientSecret: env.GITHUB_CLIENT_SECRET,
     },
   },
-  // uncomment cookieCache setting when ready to deploy to Cloudflare using *.workers.dev domains
-  // session: {
-  //   cookieCache: {
-  //     enabled: true,
-  //     maxAge: 60,
-  //   },
-  // },
+  session: {
+    cookieCache: {
+      enabled: !!workersDomain,
+      maxAge: 60,
+    },
+  },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
   advanced: {
@@ -46,12 +64,12 @@ export const auth = betterAuth({
       secure: true,
       httpOnly: true,
     },
-    // uncomment crossSubDomainCookies setting when ready to deploy and replace <your-workers-subdomain> with your actual workers subdomain
-    // https://developers.cloudflare.com/workers/wrangler/configuration/#workersdev
-    // crossSubDomainCookies: {
-    //   enabled: true,
-    //   domain: "<your-workers-subdomain>",
-    // },
+    ...(workersDomain && {
+      crossSubDomainCookies: {
+        enabled: true,
+        domain: workersDomain,
+      },
+    }),
   },
   plugins: [
     organization({

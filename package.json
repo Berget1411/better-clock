@@ -61,11 +61,11 @@
     "@open-learn/config": "workspace:*",
     "@types/node": "catalog:",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
+    "lint-staged": "^16.4.0",
     "oxfmt": "^0.26.0",
-    "oxlint": "^1.41.0",
-    "turbo": "^2.8.12",
-    "typescript": "^5"
+    "oxlint": "^1.59.0",
+    "turbo": "^2.9.6",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*": [

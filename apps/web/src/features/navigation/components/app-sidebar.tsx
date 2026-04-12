@@ -27,37 +27,32 @@ import NavManage from "./nav-manage";
 const navMainItems = [
   {
     title: "Dashboard",
-    to: "/",
+    to: "/app",
     icon: HomeIcon,
   },
   {
     title: "Reports",
-    to: "/reports",
+    to: "/app/reports",
     icon: BarChartIcon,
   },
   {
     title: "Time Tracker",
-    to: "/tracker",
+    to: "/app/tracker",
     icon: Clock3Icon,
   },
   {
     title: "Tasks",
-    to: "/tasks",
+    to: "/app/tasks",
     icon: ListTodoIcon,
   },
   {
     title: "Calendar",
-    to: "/calendar",
+    to: "/app/calendar",
     icon: CalendarIcon,
   },
   {
-    title: "Kanban",
-    to: "/kanban",
-    icon: KanbanIcon,
-  },
-  {
     title: "AI Chat",
-    to: "/ai",
+    to: "/app/ai",
     icon: BotIcon,
   },
 ] as const;
@@ -66,25 +61,25 @@ const navManageItems = [
   {
     title: "Projects",
     subtitle: "Manage your projects",
-    to: "/projects",
+    to: "/app/projects",
     icon: FolderIcon,
   },
   {
     title: "Teams",
     subtitle: "Manage your teams",
-    to: "/teams",
+    to: "/app/teams",
     icon: UsersIcon,
   },
   {
     title: "Clients",
     subtitle: "Manage your clients",
-    to: "/clients",
+    to: "/app/clients",
     icon: Building2Icon,
   },
   {
     title: "Tags",
     subtitle: "Manage your tags",
-    to: "/tags",
+    to: "/app/tags",
     icon: TagIcon,
   },
 ] as const;

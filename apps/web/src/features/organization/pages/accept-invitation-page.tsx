@@ -44,7 +44,7 @@ export default function AcceptInvitationPage({ invitationId }: AcceptInvitationP
       const result = await authClient.organization.acceptInvitation({ invitationId });
       if (result.error) throw new Error(result.error.message);
       toast.success("You've joined the organisation");
-      navigate({ to: "/" });
+      navigate({ to: "/app" });
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to accept invitation");
     } finally {
@@ -58,7 +58,7 @@ export default function AcceptInvitationPage({ invitationId }: AcceptInvitationP
       const result = await authClient.organization.rejectInvitation({ invitationId });
       if (result.error) throw new Error(result.error.message);
       toast.success("Invitation declined");
-      navigate({ to: "/" });
+      navigate({ to: "/app" });
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to decline invitation");
     } finally {

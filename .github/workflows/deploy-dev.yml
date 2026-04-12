@@ -8,6 +8,26 @@ jobs:
   deploy:
     name: Deploy to Cloudflare (dev)
     runs-on: ubuntu-latest
+    env:
+      ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+      ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+      # Secrets — same for dev and prod
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      POLAR_ACCESS_TOKEN: ${{ secrets.POLAR_ACCESS_TOKEN }}
+      GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+      GMAIL_USER: ${{ secrets.GMAIL_USER }}
+      # Dev-specific
+      DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
+      CORS_ORIGIN: https://open-clock-web-dev.ludvig1411.workers.dev
+      BETTER_AUTH_URL: https://open-clock-server-dev.ludvig1411.workers.dev
+      POLAR_SUCCESS_URL: https://open-clock-web-dev.ludvig1411.workers.dev/success?checkout_id={CHECKOUT_ID}
 
     steps:
       - uses: actions/checkout@v4
@@ -22,23 +42,3 @@ jobs:
       - name: Deploy
         run: bun run deploy:dev
         working-directory: packages/infra
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
-          ALCHEMY_STATE_TOKEN: ${{ secrets.ALCHEMY_STATE_TOKEN }}
-          # Secrets — same for dev and prod
-          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-          POLAR_ACCESS_TOKEN: ${{ secrets.POLAR_ACCESS_TOKEN }}
-          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          # Dev-specific database
-          DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
-          # Dev-specific non-sensitive config
-          CORS_ORIGIN: https://open-clock-web-dev.ludvig1411.workers.dev
-          BETTER_AUTH_URL: https://open-clock-server-dev.ludvig1411.workers.dev
-          POLAR_SUCCESS_URL: https://open-clock-web-dev.ludvig1411.workers.dev/success?checkout_id={CHECKOUT_ID}
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}

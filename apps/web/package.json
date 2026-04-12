@@ -8,6 +8,7 @@
     "serve": "vite preview",
     "start": "vite",
     "check-types": "tsc --noEmit",
+    "dev": "vite dev",
     "dev:bare": "vite dev"
   },
   "dependencies": {
@@ -33,11 +34,13 @@
     "@trpc/tanstack-react-query": "^11.7.2",
     "ai": "catalog:",
     "better-auth": "catalog:",
+    "date-fns": "^4.1.0",
     "dotenv": "catalog:",
     "lucide-react": "catalog:",
     "motion": "^12.36.0",
     "next-themes": "catalog:",
     "react": "^19.2.3",
+    "react-big-calendar": "^1.19.4",
     "react-dom": "^19.2.3",
     "sonner": "catalog:",
     "streamdown": "^1.6.10",

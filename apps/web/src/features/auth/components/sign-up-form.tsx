@@ -26,7 +26,7 @@ export default function SignUpForm({
   onSwitchToSignIn: () => void;
   invitationId?: string;
 }) {
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate();
   const { isPending } = authClient.useSession();
 
   const form = useForm({

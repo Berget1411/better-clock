@@ -14,13 +14,13 @@ import { Skeleton } from "@open-learn/ui/components/skeleton";
 import { useRouterState } from "@tanstack/react-router";
 
 const titles: Record<string, string> = {
-  "/": "Dashboard",
-  "/ai": "AI Chat",
-  "/reports": "Reports",
-  "/tags": "Tags",
-  "/tasks": "Tasks",
-  "/todos": "Todos",
-  "/tracker": "Time Tracker",
+  "/app": "Dashboard",
+  "/app/ai": "AI Chat",
+  "/app/reports": "Reports",
+  "/app/tags": "Tags",
+  "/app/tasks": "Tasks",
+  "/app/todos": "Todos",
+  "/app/tracker": "Time Tracker",
 };
 
 const pendingListItems = ["one", "two", "three", "four", "five"] as const;

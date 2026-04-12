@@ -1,0 +1,170 @@
+.open-clock-calendar {
+  --calendar-billable: var(--color-billable);
+  --calendar-tracked: var(--color-tracked);
+  --calendar-active: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --calendar-grid: color-mix(in srgb, var(--border) 90%, transparent);
+}
+
+.open-clock-calendar .rbc-calendar,
+.open-clock-calendar .rbc-time-view,
+.open-clock-calendar .rbc-month-view,
+.open-clock-calendar .rbc-header,
+.open-clock-calendar .rbc-time-content,
+.open-clock-calendar .rbc-time-header-content,
+.open-clock-calendar .rbc-time-header,
+.open-clock-calendar .rbc-day-bg,
+.open-clock-calendar .rbc-timeslot-group,
+.open-clock-calendar .rbc-time-slot,
+.open-clock-calendar .rbc-show-more,
+.open-clock-calendar .rbc-overlay,
+.open-clock-calendar .rbc-event,
+.open-clock-calendar .rbc-selected-cell {
+  border-radius: 0;
+}
+
+.open-clock-calendar .rbc-calendar {
+  height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 12px;
+}
+
+.open-clock-calendar .rbc-time-view,
+.open-clock-calendar .rbc-month-view {
+  border: 0;
+}
+
+.open-clock-calendar .rbc-month-row + .rbc-month-row,
+.open-clock-calendar .rbc-time-content,
+.open-clock-calendar .rbc-timeslot-group,
+.open-clock-calendar .rbc-day-bg,
+.open-clock-calendar .rbc-header,
+.open-clock-calendar .rbc-time-header-content,
+.open-clock-calendar .rbc-time-content > * + * > *,
+.open-clock-calendar .rbc-agenda-view table.rbc-agenda-table tbody > tr + tr {
+  border-color: var(--calendar-grid);
+}
+
+.open-clock-calendar .rbc-header {
+  border-bottom: 1px solid var(--calendar-grid);
+  border-right: 1px solid var(--calendar-grid);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+}
+
+.open-clock-calendar .rbc-time-header,
+.open-clock-calendar .rbc-time-gutter {
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+}
+
+.open-clock-calendar .rbc-time-gutter .rbc-timeslot-group,
+.open-clock-calendar .rbc-time-gutter .rbc-time-slot {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+.open-clock-calendar .rbc-time-gutter .rbc-label {
+  padding-right: 0.75rem;
+}
+
+.open-clock-calendar .rbc-day-slot .rbc-time-slot,
+.open-clock-calendar .rbc-time-content {
+  border-top-color: color-mix(in srgb, var(--border) 65%, transparent);
+}
+
+.open-clock-calendar .rbc-day-bg {
+  background: var(--background);
+}
+
+.open-clock-calendar .rbc-off-range-bg {
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+
+.open-clock-calendar .rbc-off-range {
+  color: var(--muted-foreground);
+}
+
+.open-clock-calendar .rbc-today {
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+
+.open-clock-calendar .rbc-current-time-indicator {
+  border-top: 1px solid var(--calendar-billable);
+  background: var(--calendar-billable);
+  height: 1px;
+}
+
+.open-clock-calendar .rbc-event,
+.open-clock-calendar .rbc-day-slot .rbc-event {
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--muted) 45%, var(--background));
+  color: var(--foreground);
+  box-shadow: none;
+  padding: 0;
+}
+
+.open-clock-calendar .rbc-event:focus,
+.open-clock-calendar .rbc-event:active,
+.open-clock-calendar .rbc-event.rbc-selected {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+
+.open-clock-calendar .rbc-event.calendar-entry-event--billable {
+  background: color-mix(in srgb, var(--calendar-billable) 10%, var(--background));
+  border-color: color-mix(in srgb, var(--calendar-billable) 35%, transparent);
+}
+
+.open-clock-calendar .rbc-event.calendar-entry-event--tracked {
+  background: color-mix(in srgb, var(--calendar-tracked) 10%, var(--background));
+  border-color: color-mix(in srgb, var(--calendar-tracked) 35%, transparent);
+}
+
+.open-clock-calendar .rbc-event.calendar-entry-event--active {
+  background: color-mix(in srgb, var(--calendar-active) 75%, var(--background));
+  border-color: color-mix(in srgb, var(--foreground) 18%, transparent);
+}
+
+.open-clock-calendar .rbc-show-more {
+  background: var(--muted);
+  border: 1px solid var(--calendar-grid);
+  color: var(--foreground);
+  padding: 0.125rem 0.375rem;
+  font-size: 11px;
+}
+
+.open-clock-calendar .rbc-overlay {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  ring: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.open-clock-calendar .rbc-overlay-header {
+  border-bottom: 1px solid var(--calendar-grid);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.open-clock-calendar .rbc-month-row,
+.open-clock-calendar .rbc-time-content,
+.open-clock-calendar .rbc-time-header {
+  min-height: 0;
+}
+
+.open-clock-calendar .rbc-month-view .rbc-date-cell {
+  padding: 0.35rem 0.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.open-clock-calendar .rbc-agenda-empty {
+  color: var(--muted-foreground);
+}

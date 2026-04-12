@@ -4,12 +4,12 @@ import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 import { AUTH_REDIRECT } from "../constants";
-import { FaGoogle, FaGithub } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
 
 export default function OAuthButtons({ invitationId }: { invitationId?: string }) {
-  const [loadingProvider, setLoadingProvider] = useState<"google" | "github" | null>(null);
+  const [loadingProvider, setLoadingProvider] = useState<"google" | null>(null);
 
-  async function handleOAuth(provider: "google" | "github") {
+  async function handleOAuth(provider: "google") {
     setLoadingProvider(provider);
 
     // If there's a pending invitation, send the user back to the accept page
@@ -43,16 +43,6 @@ export default function OAuthButtons({ invitationId }: { invitationId?: string }
       >
         <FaGoogle />
         {loadingProvider === "google" ? "Connecting..." : "Google"}
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        disabled={loadingProvider !== null}
-        onClick={() => handleOAuth("github")}
-      >
-        <FaGithub />
-        {loadingProvider === "github" ? "Connecting..." : "GitHub"}
       </Button>
     </div>
   );

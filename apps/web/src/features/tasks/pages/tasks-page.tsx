@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { AppPage, AppPageHeader, AppPageHeaderMeta } from "@/components/app-page-shell";
 import { useProjectsQuery } from "@/features/projects/services/queries";
 import { Badge } from "@open-learn/ui/components/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@open-learn/ui/components/tabs";
@@ -15,44 +16,51 @@ export function TasksPage() {
   const projectsQuery = useProjectsQuery({ showArchived: false });
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{TASK_COPY.pageTitle}</h1>
-          <p className="text-sm text-muted-foreground">{TASK_COPY.pageDescription}</p>
-        </div>
+    <Tabs value={view} onValueChange={setView}>
+      <AppPage>
+        <AppPageHeader
+          title={TASK_COPY.pageTitle}
+          description="Switch between a dense planning table and a flow-oriented board without losing the same task context."
+          actions={
+            <TabsList variant="line">
+              <TabsTrigger value="table">Table</TabsTrigger>
+              <TabsTrigger value="kanban">
+                Kanban
+                <Badge
+                  variant="outline"
+                  className="rounded-none px-1.5 py-0 text-[10px] uppercase tracking-[0.18em]"
+                >
+                  New
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          }
+        >
+          <AppPageHeaderMeta
+            items={[
+              { label: "Tasks", value: String(tasksQuery.data?.length ?? 0) },
+              { label: "Projects", value: String(projectsQuery.data?.length ?? 0) },
+              { label: "View", value: view === "table" ? "Table" : "Kanban" },
+            ]}
+          />
+        </AppPageHeader>
 
-        <Tabs value={view} onValueChange={setView} className="gap-3">
-          <TabsList variant="line">
-            <TabsTrigger value="table">Table</TabsTrigger>
-            <TabsTrigger value="kanban">
-              Kanban
-              <Badge
-                variant="outline"
-                className="rounded-none px-1.5 py-0 text-[10px] uppercase tracking-[0.18em]"
-              >
-                New
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+        <TabsContent value="table" className="mt-0">
+          <TasksTable
+            tasks={tasksQuery.data ?? []}
+            projects={projectsQuery.data ?? []}
+            isLoading={tasksQuery.isLoading}
+          />
+        </TabsContent>
 
-          <TabsContent value="table">
-            <TasksTable
-              tasks={tasksQuery.data ?? []}
-              projects={projectsQuery.data ?? []}
-              isLoading={tasksQuery.isLoading}
-            />
-          </TabsContent>
-
-          <TabsContent value="kanban">
-            <TasksKanban
-              tasks={tasksQuery.data ?? []}
-              projects={projectsQuery.data ?? []}
-              isLoading={tasksQuery.isLoading}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+        <TabsContent value="kanban" className="mt-0">
+          <TasksKanban
+            tasks={tasksQuery.data ?? []}
+            projects={projectsQuery.data ?? []}
+            isLoading={tasksQuery.isLoading}
+          />
+        </TabsContent>
+      </AppPage>
+    </Tabs>
   );
 }

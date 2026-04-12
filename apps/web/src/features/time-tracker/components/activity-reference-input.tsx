@@ -1,7 +1,6 @@
 import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 
-import { Button } from "@open-learn/ui/components/button";
-import { ButtonGroup } from "@open-learn/ui/components/button-group";
+import { PencilLineIcon, CheckSquareIcon } from "lucide-react";
 import { Input } from "@open-learn/ui/components/input";
 
 import { CompactTaskPicker } from "./compact-task-picker";
@@ -32,32 +31,30 @@ export function ActivityReferenceInput({
   onTaskChange,
   tasks,
 }: ActivityReferenceInputProps) {
+  const toggle = () => {
+    if (mode === "description") {
+      onModeChange("task");
+      description.onChange("");
+    } else {
+      onModeChange("description");
+      onTaskChange(null);
+    }
+  };
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:items-center">
-      <ButtonGroup className="shrink-0">
-        <Button
-          type="button"
-          variant={mode === "description" ? "secondary" : "outline"}
-          className="h-10 px-3"
-          onClick={() => {
-            onModeChange("description");
-            onTaskChange(null);
-          }}
-        >
-          Write
-        </Button>
-        <Button
-          type="button"
-          variant={mode === "task" ? "secondary" : "outline"}
-          className="h-10 px-3"
-          onClick={() => {
-            onModeChange("task");
-            description.onChange("");
-          }}
-        >
-          Task
-        </Button>
-      </ButtonGroup>
+    <div className="flex min-w-0 flex-1 items-center gap-1.5">
+      <button
+        type="button"
+        onClick={toggle}
+        title={mode === "description" ? "Switch to task" : "Switch to write"}
+        className="shrink-0 rounded p-1 text-muted-foreground/50 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        {mode === "description" ? (
+          <PencilLineIcon className="size-3.5" />
+        ) : (
+          <CheckSquareIcon className="size-3.5" />
+        )}
+      </button>
 
       <div className="min-w-0 flex-1">
         {mode === "task" ? (

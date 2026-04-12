@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { ArrowUpRightIcon, ChevronRightIcon, Clock3Icon, ImageOffIcon } from "lucide-react";
+import { ArrowUpRightIcon, ChevronRightIcon, ImageOffIcon } from "lucide-react";
 import { LazyMotion, domAnimation, m } from "motion/react";
 
+import { Badge } from "@open-learn/ui/components/badge";
 import { Button } from "@open-learn/ui/components/button";
 import { Link } from "@tanstack/react-router";
 
@@ -10,6 +11,7 @@ import heroAvif832 from "@/public/example-hero-832.avif";
 import heroWebp from "@/public/example-hero.webp";
 import heroWebp832 from "@/public/example-hero-832.webp";
 import heroPng from "@/public/example-hero.png";
+import logoSvg from "@/public/logo.svg";
 
 const GITHUB_URL = "https://github.com/Berget1411/open-clock";
 
@@ -41,16 +43,19 @@ export default function HomePage() {
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <Link
               to="/"
-              aria-label="Open Clock home"
+              aria-label="better clock home"
               className="inline-flex min-h-11 min-w-0 items-center gap-3 text-sm font-medium transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
               <span
-                className="flex size-9 shrink-0 items-center justify-center border border-border bg-muted text-foreground"
+                className="flex size-9 shrink-0 items-center justify-center border border-border bg-muted"
                 aria-hidden="true"
               >
-                <Clock3Icon className="size-4" />
+                <img src={logoSvg} alt="" className="size-9 dark:invert" />
               </span>
-              <span className="min-w-0 truncate">Open Clock</span>
+              <span className="min-w-0 truncate">better clock</span>
+              <Badge variant="secondary" className="shrink-0 text-[10px]">
+                Beta
+              </Badge>
             </Link>
 
             <nav aria-label="Site navigation">
@@ -60,7 +65,7 @@ export default function HomePage() {
                     href={GITHUB_URL}
                     target="_blank"
                     rel="noreferrer noopener"
-                    aria-label="Open Clock on GitHub (opens in new tab)"
+                    aria-label="better clock on GitHub (opens in new tab)"
                   >
                     <span aria-hidden="true">GitHub</span>
                     <ArrowUpRightIcon className="size-4 rtl:rotate-[270deg]" aria-hidden="true" />
@@ -132,7 +137,7 @@ export default function HomePage() {
                   />
                   <img
                     src={heroPng}
-                    alt="Open Clock dashboard showing tracked hours, recent activity, and reporting views."
+                    alt="better clock dashboard showing tracked hours, recent activity, and reporting views."
                     width={1664}
                     height={1720}
                     loading="lazy"
@@ -148,12 +153,12 @@ export default function HomePage() {
 
         <footer className="border-t border-border/70">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 text-xs text-muted-foreground sm:px-6">
-            <p>© 2026 Open Clock</p>
+            <p>© 2026 better clock</p>
             <a
               href={GITHUB_URL}
               target="_blank"
               rel="noreferrer noopener"
-              aria-label="Open Clock on GitHub (opens in new tab)"
+              aria-label="better clock on GitHub (opens in new tab)"
               className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
               <span aria-hidden="true">GitHub</span>

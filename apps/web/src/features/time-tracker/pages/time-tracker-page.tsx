@@ -1,13 +1,26 @@
 import { useMemo, useState } from "react";
+
+import {
+  AppPage,
+  AppPageHeader,
+  AppPageHeaderMeta,
+  AppSurface,
+  AppSurfaceHeader,
+} from "@/components/app-page-shell";
+import { useTasksQuery } from "@/features/tasks/services/queries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@open-learn/ui/components/tabs";
 
-import { useTasksQuery } from "@/features/tasks/services/queries";
 import { ActivityHistoryList } from "../components/activity-history-list";
 import { ManualEntryForm } from "../components/manual-entry-form";
 import { TimerEntryForm } from "../components/timer-entry-form";
 import { TRACKER_COPY } from "../constants";
 import { useTrackerOverviewQuery } from "../services/queries";
-import { getTrackerOverviewRange } from "../utils/date-time";
+import {
+  formatDuration,
+  getElapsedSeconds,
+  getEntryDurationSeconds,
+  getTrackerOverviewRange,
+} from "../utils/date-time";
 
 export default function TimeTrackerPage() {
   const [mode, setMode] = useState("timer");
@@ -16,51 +29,100 @@ export default function TimeTrackerPage() {
   const trackerOverview = useTrackerOverviewQuery(range);
   const tasksQuery = useTasksQuery();
 
+  const entries = trackerOverview.data?.entries ?? [];
+  const activeEntry = trackerOverview.data?.activeEntry ?? null;
+  const projects = trackerOverview.data?.projects ?? [];
+  const tags = trackerOverview.data?.tags ?? [];
+
+  const todayTotal = useMemo(() => {
+    const todayKey = new Date().toDateString();
+    const completedToday = entries.reduce((total, entry) => {
+      return new Date(entry.startAt).toDateString() === todayKey
+        ? total + getEntryDurationSeconds(entry)
+        : total;
+    }, 0);
+
+    if (!activeEntry || new Date(activeEntry.startAt).toDateString() !== todayKey) {
+      return completedToday;
+    }
+
+    return completedToday + getElapsedSeconds(activeEntry.startAt, new Date());
+  }, [activeEntry, entries]);
+
   return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{TRACKER_COPY.pageTitle}</h1>
-        <p className="text-sm text-muted-foreground">{TRACKER_COPY.pageDescription}</p>
-      </div>
-
-      <Tabs value={mode} onValueChange={setMode} className="flex flex-col gap-3">
-        <div className="flex justify-start">
-          <TabsList variant="line">
-            <TabsTrigger value="timer">{TRACKER_COPY.timerTab}</TabsTrigger>
-            <TabsTrigger value="manual">{TRACKER_COPY.manualTab}</TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="timer">
-          <TimerEntryForm
-            activeEntry={trackerOverview.data?.activeEntry ?? null}
-            projects={trackerOverview.data?.projects ?? []}
-            tasks={tasksQuery.data ?? []}
-            tags={trackerOverview.data?.tags ?? []}
-            range={range}
+    <Tabs value={mode} onValueChange={setMode}>
+      <AppPage>
+        <AppPageHeader
+          title={TRACKER_COPY.pageTitle}
+          description="Start a timer quickly, add manual entries when needed, and keep recent activity easy to understand."
+          actions={
+            <TabsList variant="line">
+              <TabsTrigger value="timer">{TRACKER_COPY.timerTab}</TabsTrigger>
+              <TabsTrigger value="manual">{TRACKER_COPY.manualTab}</TabsTrigger>
+            </TabsList>
+          }
+        >
+          <AppPageHeaderMeta
+            items={[
+              { label: "State", value: activeEntry ? "Running" : "Ready" },
+              { label: "Today", value: formatDuration(todayTotal) },
+              { label: "Sessions", value: String(entries.length) },
+            ]}
           />
-        </TabsContent>
+        </AppPageHeader>
 
-        <TabsContent value="manual">
-          <ManualEntryForm
-            projects={trackerOverview.data?.projects ?? []}
-            tasks={tasksQuery.data ?? []}
-            tags={trackerOverview.data?.tags ?? []}
-            range={range}
+        <AppSurface>
+          <AppSurfaceHeader
+            label="Capture"
+            title={mode === "timer" ? "Track work live" : "Add time after the fact"}
+            description={
+              mode === "timer"
+                ? "Keep the current task in focus and expand details only when you need them."
+                : "Use manual mode when the work is already done and the exact time is known."
+            }
           />
-        </TabsContent>
-      </Tabs>
+          <div className="p-4">
+            <TabsContent value="timer" className="mt-0">
+              <TimerEntryForm
+                activeEntry={activeEntry}
+                projects={projects}
+                tasks={tasksQuery.data ?? []}
+                tags={tags}
+                range={range}
+              />
+            </TabsContent>
 
-      <ActivityHistoryList
-        entries={trackerOverview.data?.entries ?? []}
-        projects={trackerOverview.data?.projects ?? []}
-        tasks={tasksQuery.data ?? []}
-        tags={trackerOverview.data?.tags ?? []}
-        range={range}
-        expandedEntryId={expandedEntryId}
-        onExpandedEntryChange={setExpandedEntryId}
-        isLoading={trackerOverview.isLoading || tasksQuery.isLoading}
-      />
-    </div>
+            <TabsContent value="manual" className="mt-0">
+              <ManualEntryForm
+                projects={projects}
+                tasks={tasksQuery.data ?? []}
+                tags={tags}
+                range={range}
+              />
+            </TabsContent>
+          </div>
+        </AppSurface>
+
+        <AppSurface>
+          <AppSurfaceHeader
+            label="History"
+            title="Recent activity"
+            description="Entries stay grouped by week and day so edits remain scannable."
+          />
+          <div className="p-4">
+            <ActivityHistoryList
+              entries={entries}
+              projects={projects}
+              tasks={tasksQuery.data ?? []}
+              tags={tags}
+              range={range}
+              expandedEntryId={expandedEntryId}
+              onExpandedEntryChange={setExpandedEntryId}
+              isLoading={trackerOverview.isLoading || tasksQuery.isLoading}
+            />
+          </div>
+        </AppSurface>
+      </AppPage>
+    </Tabs>
   );
 }

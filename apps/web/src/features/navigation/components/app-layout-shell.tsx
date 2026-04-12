@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import AppSidebar from "@/features/navigation/components/app-sidebar";
+import { getAppNavSectionLabel, getAppRouteMeta } from "@/features/navigation/app-navigation";
+import { Badge } from "@open-learn/ui/components/badge";
 import { Separator } from "@open-learn/ui/components/separator";
 import {
   SidebarInset,
@@ -13,30 +15,36 @@ import {
 import { Skeleton } from "@open-learn/ui/components/skeleton";
 import { useRouterState } from "@tanstack/react-router";
 
-const titles: Record<string, string> = {
-  "/app": "Dashboard",
-  "/app/ai": "AI Chat",
-  "/app/reports": "Reports",
-  "/app/tags": "Tags",
-  "/app/tasks": "Tasks",
-  "/app/todos": "Todos",
-  "/app/tracker": "Time Tracker",
-};
-
 const pendingListItems = ["one", "two", "three", "four", "five"] as const;
 
 export function AppLayoutShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const routeMeta = getAppRouteMeta(pathname);
+  const sectionLabel = routeMeta ? getAppNavSectionLabel(routeMeta.section) : null;
 
   return (
-    <SidebarProvider style={{ "--sidebar-width": "12rem" } as CSSProperties}>
+    <SidebarProvider style={{ "--sidebar-width": "14rem" } as CSSProperties}>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">{titles[pathname] ?? "open-learn"}</p>
+            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em]">
+              <span className="text-foreground">better clock</span>
+              <Badge
+                variant="secondary"
+                className="shrink-0 text-[9px] px-1 h-4 normal-case tracking-normal"
+              >
+                Beta
+              </Badge>
+              {sectionLabel ? (
+                <>
+                  <span className="text-muted-foreground/60">/</span>
+                  <span className="truncate text-muted-foreground">{sectionLabel}</span>
+                </>
+              ) : null}
+            </div>
           </div>
         </header>
         <div className="flex min-h-0 flex-1 flex-col p-4 md:p-6">{children}</div>

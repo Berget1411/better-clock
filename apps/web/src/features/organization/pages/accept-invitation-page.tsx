@@ -86,7 +86,7 @@ export default function AcceptInvitationPage({ invitationId }: AcceptInvitationP
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Organisation Invitation</CardTitle>
           <CardDescription>
-            You've been invited to join an organisation on Open Clock.
+            You've been invited to join an organisation on better clock.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">

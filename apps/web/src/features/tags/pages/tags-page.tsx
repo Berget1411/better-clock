@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+
+import { AppPage, AppPageHeader, AppSurface } from "@/components/app-page-shell";
 import { authClient } from "@/lib/auth-client";
 import { Skeleton } from "@open-learn/ui/components/skeleton";
-import { TagsTable } from "@/features/tags/components/tags-table";
-import { TAGS_COPY } from "@/features/tags/constants";
+
+import { TagsTable } from "../components/tags-table";
+import { TAGS_COPY } from "../constants";
 
 export default function TagsPage() {
   const sessionQuery = useQuery({
@@ -13,7 +16,7 @@ export default function TagsPage() {
 
   if (sessionQuery.isPending) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-6">
         <Skeleton className="h-8 w-24" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -28,9 +31,14 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">{TAGS_COPY.pageTitle}</h1>
-      <TagsTable />
-    </div>
+    <AppPage>
+      <AppPageHeader
+        title={TAGS_COPY.pageTitle}
+        description="Maintain a clear tagging system so filters, reports, and time entry stay predictable."
+      />
+      <AppSurface>
+        <TagsTable />
+      </AppSurface>
+    </AppPage>
   );
 }

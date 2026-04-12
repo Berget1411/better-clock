@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
 import { ActivityIcon, CalendarRangeIcon } from "lucide-react";
 
+import { AppPage, AppPageHeader, AppPageHeaderMeta } from "@/components/app-page-shell";
 import { Badge } from "@open-learn/ui/components/badge";
 import {
   Card,
@@ -32,17 +33,18 @@ import {
 import { getEntryDescriptionLabel, getElapsedSeconds } from "../utils/date-time";
 
 const DashboardBarChart = lazy(() =>
-  import("../components/dashboard-charts").then((m) => ({ default: m.DashboardBarChart })),
+  import("../components/charts").then((module) => ({
+    default: module.TrackerBarChart,
+  })),
 );
 const DashboardPieChart = lazy(() =>
-  import("../components/dashboard-charts").then((m) => ({ default: m.DashboardPieChart })),
+  import("../components/charts").then((module) => ({
+    default: module.DashboardPieChart,
+  })),
 );
-
-type BreakdownMode = "project" | "billability";
 
 export default function TrackerDashboardPage() {
   const [rangeKey, setRangeKey] = useState<DashboardRangeKey>("30d");
-  const [breakdownMode, setBreakdownMode] = useState<BreakdownMode>("project");
   const range = useMemo(() => getDashboardRange(rangeKey), [rangeKey]);
   const trackerOverview = useTrackerOverviewQuery(range);
   const metrics = useMemo(
@@ -54,33 +56,10 @@ export default function TrackerDashboardPage() {
       }),
     [rangeKey, trackerOverview.data?.entries, trackerOverview.data?.tags],
   );
-  const breakdownItems = useMemo(() => {
-    if (breakdownMode === "billability") {
-      return [
-        {
-          name: "Billable",
-          seconds: metrics.billableSeconds,
-          hours: metrics.billableSeconds / 3600,
-          percentage: metrics.billableShare,
-          fill: "hsl(200 78% 46%)",
-        },
-        {
-          name: "Non-billable",
-          seconds: metrics.nonBillableSeconds,
-          hours: metrics.nonBillableSeconds / 3600,
-          percentage: metrics.nonBillableShare,
-          fill: "hsl(210 16% 82%)",
-        },
-      ].filter((item) => item.seconds > 0);
-    }
 
-    return metrics.projects;
-  }, [breakdownMode, metrics]);
-  const breakdownTitle = breakdownMode === "project" ? "Project split" : "Billable split";
-  const breakdownDescription =
-    breakdownMode === "project"
-      ? "Distribution of tracked time across projects"
-      : "Distribution of tracked time across billable and non-billable work";
+  const breakdownItems = metrics.projects;
+  const breakdownTitle = "Project split";
+  const breakdownDescription = "Distribution of tracked time across projects";
 
   const rangeLabel =
     DASHBOARD_RANGE_OPTIONS.find((option) => option.key === rangeKey)?.label ?? "Last 30 days";
@@ -89,47 +68,38 @@ export default function TrackerDashboardPage() {
   const hasEntries = metrics.totalSeconds > 0;
 
   return (
-    <div className="flex w-full flex-col gap-4">
-      <section className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {activeEntry
-              ? `Running now: ${getEntryDescriptionLabel(activeEntry.description)} - ${formatMetricDuration(activeTimerSeconds)}`
-              : "Overview of tracked time across your recent work."}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <FilterSelect
-            ariaLabel="Select breakdown type"
-            value={breakdownMode}
-            onValueChange={(value) => setBreakdownMode(value as BreakdownMode)}
-            placeholder="Project"
-            options={[
-              { value: "project", label: "Project" },
-              { value: "billability", label: "Billability" },
-            ]}
-          />
-          <FilterSelect
-            ariaLabel="Owner filter"
-            value="me"
-            onValueChange={() => undefined}
-            placeholder="Owner"
-            options={[{ value: "me", label: "Only me" }]}
-          />
-          <FilterSelect
-            ariaLabel="Select date range"
-            value={rangeKey}
-            onValueChange={(value) => setRangeKey(value as DashboardRangeKey)}
-            placeholder="Range"
-            options={DASHBOARD_RANGE_OPTIONS.map((option) => ({
-              value: option.key,
-              label: option.label,
-            }))}
-            icon={<CalendarRangeIcon className="size-3.5 text-muted-foreground" />}
-          />
-        </div>
-      </section>
+    <AppPage className="gap-4">
+      <AppPageHeader
+        title="Overview"
+        description={
+          activeEntry
+            ? `Running now: ${getEntryDescriptionLabel(activeEntry.description)} - ${formatMetricDuration(activeTimerSeconds)}`
+            : "Review recent trends, standout projects, and the shape of tracked work."
+        }
+        actions={
+          <>
+            <FilterSelect
+              ariaLabel="Select date range"
+              value={rangeKey}
+              onValueChange={(value) => setRangeKey(value as DashboardRangeKey)}
+              placeholder="Range"
+              options={DASHBOARD_RANGE_OPTIONS.map((option) => ({
+                value: option.key,
+                label: option.label,
+              }))}
+              icon={<CalendarRangeIcon className="size-3.5 text-muted-foreground" />}
+            />
+          </>
+        }
+      >
+        <AppPageHeaderMeta
+          items={[
+            { label: "Range", value: rangeLabel },
+            { label: "Tracked", value: formatMetricDuration(metrics.totalSeconds) },
+            { label: "Sessions", value: String(metrics.totalSessions) },
+          ]}
+        />
+      </AppPageHeader>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
         <Card className="py-0">
@@ -161,7 +131,7 @@ export default function TrackerDashboardPage() {
                   <Skeleton className="h-[220px] w-[220px] justify-self-center" />
                   <div className="space-y-3">
                     {Array.from({ length: 3 }, (_, index) => (
-                      <Skeleton key={`skeleton-row-${index}`} className="h-12 w-full" />
+                      <Skeleton key={`overview-skeleton-${index}`} className="h-12 w-full" />
                     ))}
                   </div>
                 </div>
@@ -186,8 +156,11 @@ export default function TrackerDashboardPage() {
                     <div className="grid gap-5 px-3 py-4 md:px-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center">
                       <Skeleton className="h-[220px] w-[220px] justify-self-center" />
                       <div className="space-y-3">
-                        {Array.from({ length: 3 }, (_, i) => (
-                          <Skeleton key={`skeleton-pie-fallback-${i}`} className="h-12 w-full" />
+                        {Array.from({ length: 3 }, (_, index) => (
+                          <Skeleton
+                            key={`overview-pie-skeleton-${index}`}
+                            className="h-12 w-full"
+                          />
                         ))}
                       </div>
                     </div>
@@ -202,7 +175,7 @@ export default function TrackerDashboardPage() {
             ) : (
               <EmptyState
                 title="No tracked time in this range"
-                description="Log a few sessions from the tracker to populate the dashboard."
+                description="Log a few sessions from the tracker to populate the overview."
               />
             )}
           </CardContent>
@@ -222,7 +195,7 @@ export default function TrackerDashboardPage() {
             {trackerOverview.isLoading ? (
               <div className="space-y-2 p-3">
                 {Array.from({ length: 8 }, (_, index) => (
-                  <Skeleton key={`skeleton-activity-${index}`} className="h-14 w-full" />
+                  <Skeleton key={`activity-skeleton-${index}`} className="h-14 w-full" />
                 ))}
               </div>
             ) : metrics.activities.length ? (
@@ -249,14 +222,14 @@ export default function TrackerDashboardPage() {
             ) : (
               <EmptyState
                 title="No activities ranked yet"
-                description="Once you have tracked entries, your top activities will appear here."
+                description="Once you have tracked entries, the most-used activities will appear here."
                 className="m-3 min-h-[240px]"
               />
             )}
           </CardContent>
         </Card>
       </section>
-    </div>
+    </AppPage>
   );
 }
 
@@ -307,7 +280,7 @@ function SummaryCell({
     <div
       className={cn(
         "space-y-1 px-4 py-5",
-        bordered && "border-t border-border/70 md:border-t-0 md:border-l",
+        bordered && "border-t border-border/70 md:border-l md:border-t-0",
       )}
     >
       <p className="text-xs text-muted-foreground">{label}</p>

@@ -1,9 +1,12 @@
 import type { TrackerEntry } from "@open-learn/api/modules/time-tracker/time-tracker.schema";
 import type { SlotInfo } from "react-big-calendar";
-import type { CalendarBillableFilter } from "../constants/calendar";
 import type { CalendarEntryEvent, CalendarSheetMode, CalendarViewKey } from "../utils/calendar";
 
 import { useEffect, useMemo, useState } from "react";
+import { CalendarClockIcon } from "lucide-react";
+
+import { AppPage, AppPageHeader, AppPageHeaderMeta } from "@/components/app-page-shell";
+import { useTasksQuery } from "@/features/tasks/services/queries";
 import { Button } from "@open-learn/ui/components/button";
 import {
   Empty,
@@ -14,16 +17,14 @@ import {
   EmptyTitle,
 } from "@open-learn/ui/components/empty";
 import { Skeleton } from "@open-learn/ui/components/skeleton";
-import { CalendarClockIcon } from "lucide-react";
 
-import { useTasksQuery } from "@/features/tasks/services/queries";
 import { CALENDAR_COPY } from "../constants/calendar";
 import { CalendarActiveTimerCard } from "../components/calendar-active-timer-card";
 import { CalendarEntrySheet } from "../components/calendar-entry-sheet";
 import { CalendarToolbar } from "../components/calendar-toolbar";
 import { TrackerCalendar } from "../components/tracker-calendar";
-import { useTrackerOverviewQuery } from "../services/queries";
 import { useUpdateEntry } from "../services/mutations";
+import { useTrackerOverviewQuery } from "../services/queries";
 import {
   getCalendarRange,
   getCalendarViewTitle,
@@ -42,7 +43,6 @@ export default function CalendarPage() {
   const [view, setView] = useState<CalendarViewKey>("week");
   const [focusedDate, setFocusedDate] = useState(() => new Date());
   const [projectFilter, setProjectFilter] = useState<string>("all");
-  const [billableFilter, setBillableFilter] = useState<CalendarBillableFilter>("all");
   const [sheetState, setSheetState] = useState<CalendarSheetState | null>(null);
   const [now, setNow] = useState(() => new Date());
 
@@ -65,18 +65,9 @@ export default function CalendarPage() {
     const entries = trackerOverview.data?.entries ?? [];
 
     return entries.filter((entry) => {
-      const matchesProject =
-        projectFilter === "all" ? true : String(entry.project?.id ?? "") === projectFilter;
-      const matchesBillable =
-        billableFilter === "all"
-          ? true
-          : billableFilter === "billable"
-            ? entry.isBillable
-            : !entry.isBillable;
-
-      return matchesProject && matchesBillable;
+      return projectFilter === "all" ? true : String(entry.project?.id ?? "") === projectFilter;
     });
-  }, [billableFilter, projectFilter, trackerOverview.data?.entries]);
+  }, [projectFilter, trackerOverview.data?.entries]);
 
   const visibleEvents = useMemo(
     () =>
@@ -85,16 +76,12 @@ export default function CalendarPage() {
         activeEntry:
           trackerOverview.data?.activeEntry &&
           (projectFilter === "all" ||
-            String(trackerOverview.data.activeEntry.project?.id ?? "") === projectFilter) &&
-          (billableFilter === "all" ||
-            (billableFilter === "billable"
-              ? trackerOverview.data.activeEntry.isBillable
-              : !trackerOverview.data.activeEntry.isBillable))
+            String(trackerOverview.data.activeEntry.project?.id ?? "") === projectFilter)
             ? trackerOverview.data.activeEntry
             : null,
         now,
       }),
-    [billableFilter, filteredEntries, now, projectFilter, trackerOverview.data?.activeEntry],
+    [filteredEntries, now, projectFilter, trackerOverview.data?.activeEntry],
   );
 
   const title = useMemo(() => getCalendarViewTitle(view, focusedDate), [focusedDate, view]);
@@ -181,21 +168,35 @@ export default function CalendarPage() {
   const isLoading = (trackerOverview.isLoading && !trackerOverview.data) || tasksQuery.isLoading;
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{CALENDAR_COPY.pageTitle}</h1>
-        <p className="text-sm text-muted-foreground">{CALENDAR_COPY.pageDescription}</p>
-      </div>
+    <AppPage>
+      <AppPageHeader
+        title={CALENDAR_COPY.pageTitle}
+        description="Review your schedule visually, move finished work in context, and create entries directly from the calendar."
+      >
+        <AppPageHeaderMeta
+          items={[
+            { label: "View", value: view },
+            { label: "Range", value: title },
+            {
+              label: "Project",
+              value:
+                projectFilter === "all"
+                  ? "All"
+                  : (trackerOverview.data?.projects.find(
+                      (project) => String(project.id) === projectFilter,
+                    )?.name ?? "Filtered"),
+            },
+          ]}
+        />
+      </AppPageHeader>
 
       <CalendarToolbar
         title={title}
         view={view}
         projectFilter={projectFilter}
-        billableFilter={billableFilter}
         projects={trackerOverview.data?.projects ?? []}
         onViewChange={setView}
         onProjectFilterChange={setProjectFilter}
-        onBillableFilterChange={setBillableFilter}
         onToday={() => setFocusedDate(new Date())}
         onPrevious={() => setFocusedDate((current) => shiftCalendarDate(view, current, -1))}
         onNext={() => setFocusedDate((current) => shiftCalendarDate(view, current, 1))}
@@ -271,6 +272,6 @@ export default function CalendarPage() {
           }
         }}
       />
-    </div>
+    </AppPage>
   );
 }

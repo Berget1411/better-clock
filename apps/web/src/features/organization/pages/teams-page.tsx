@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+
+import { AppPage, AppPageHeader, AppSurface } from "@/components/app-page-shell";
 import { authClient } from "@/lib/auth-client";
-import { MembersTable } from "@/features/organization/components/members-table";
 import { Skeleton } from "@open-learn/ui/components/skeleton";
+
+import { MembersTable } from "../components/members-table";
 
 export default function TeamsPage() {
   const sessionQuery = useQuery({
@@ -15,7 +18,7 @@ export default function TeamsPage() {
 
   if (sessionQuery.isPending) {
     return (
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-6">
         <Skeleton className="h-8 w-40" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -31,14 +34,14 @@ export default function TeamsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Teams</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage the members of your organisation.
-        </p>
-      </div>
-      <MembersTable orgId={activeOrgId} />
-    </div>
+    <AppPage>
+      <AppPageHeader
+        title="Teams"
+        description="Manage members, pending invitations, and role changes for the active organisation."
+      />
+      <AppSurface>
+        <MembersTable orgId={activeOrgId} />
+      </AppSurface>
+    </AppPage>
   );
 }

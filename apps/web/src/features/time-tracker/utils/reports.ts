@@ -33,7 +33,6 @@ export interface ReportDailyDatum {
   dateKey: string;
   label: string;
   totalHours: number;
-  billableHours: number;
 }
 
 export interface ReportProjectDatum {
@@ -52,14 +51,11 @@ export interface ReportTableRow {
   hours: string;
   projectName: string;
   tagsLabel: string;
-  billableLabel: string;
   description: string;
 }
 
 export interface TrackerReportMetrics {
   totalSeconds: number;
-  billableSeconds: number;
-  nonBillableSeconds: number;
   totalSessions: number;
   activeDays: number;
   projectCount: number;
@@ -267,7 +263,6 @@ export function buildTrackerReportMetrics({
       dateKey,
       label: formatAxisLabel(day),
       totalHours: 0,
-      billableHours: 0,
     });
   }
 
@@ -286,13 +281,11 @@ export function buildTrackerReportMetrics({
         hours: formatDecimalHours(durationSeconds),
         projectName: entry.project?.name ?? "Without project",
         tagsLabel: entry.tags.length ? entry.tags.map((tag) => tag.name).join(", ") : "-",
-        billableLabel: entry.isBillable ? "Billable" : "Non-billable",
         description: getEntryDescriptionLabel(entry.description),
       } satisfies ReportTableRow;
     });
 
   let totalSeconds = 0;
-  let billableSeconds = 0;
 
   for (const entry of entries) {
     const durationSeconds = getEntryDurationSeconds(entry);
@@ -303,19 +296,12 @@ export function buildTrackerReportMetrics({
 
     totalSeconds += durationSeconds;
 
-    if (entry.isBillable) {
-      billableSeconds += durationSeconds;
-    }
-
     const startDate = new Date(entry.startAt);
     const dateKey = toDateKey(startDate);
     const day = dailyMap.get(dateKey);
 
     if (day) {
       day.totalHours += formatHours(durationSeconds);
-      if (entry.isBillable) {
-        day.billableHours += formatHours(durationSeconds);
-      }
     }
 
     const projectName = entry.project?.name ?? "Without project";
@@ -345,8 +331,6 @@ export function buildTrackerReportMetrics({
 
   return {
     totalSeconds,
-    billableSeconds,
-    nonBillableSeconds: totalSeconds - billableSeconds,
     totalSessions: rows.length,
     activeDays: [...dailyMap.values()].filter((day) => day.totalHours > 0).length,
     projectCount: projectTotals.size,
@@ -376,8 +360,6 @@ export function exportTrackerReport({
   const summary = {
     range: rangeLabel,
     totalTracked: formatDuration(metrics.totalSeconds),
-    billable: formatDuration(metrics.billableSeconds),
-    nonBillable: formatDuration(metrics.nonBillableSeconds),
     sessions: metrics.totalSessions,
     activeDays: metrics.activeDays,
     projects: metrics.projectCount,
@@ -396,13 +378,11 @@ export function exportTrackerReport({
     const lines = [
       ["Range", summary.range],
       ["Total tracked", summary.totalTracked],
-      ["Billable", summary.billable],
-      ["Non-billable", summary.nonBillable],
       ["Sessions", String(summary.sessions)],
       ["Active days", String(summary.activeDays)],
       ["Projects", String(summary.projects)],
       [],
-      ["Date", "Start", "End", "Duration", "Hours", "Project", "Tags", "Billable", "Description"],
+      ["Date", "Start", "End", "Duration", "Hours", "Project", "Tags", "Description"],
       ...metrics.rows.map((row) => [
         row.dateLabel,
         row.startTime,
@@ -411,7 +391,6 @@ export function exportTrackerReport({
         row.hours,
         row.projectName,
         row.tagsLabel,
-        row.billableLabel,
         row.description,
       ]),
     ];
@@ -435,7 +414,6 @@ export function exportTrackerReport({
           <td>${escapeHtml(row.hours)}</td>
           <td>${escapeHtml(row.projectName)}</td>
           <td>${escapeHtml(row.tagsLabel)}</td>
-          <td>${escapeHtml(row.billableLabel)}</td>
           <td>${escapeHtml(row.description)}</td>
         </tr>`,
     )
@@ -458,8 +436,6 @@ export function exportTrackerReport({
           <tr><th colspan="2">Time report summary</th></tr>
           <tr><td>Range</td><td>${escapeHtml(summary.range)}</td></tr>
           <tr><td>Total tracked</td><td>${escapeHtml(summary.totalTracked)}</td></tr>
-          <tr><td>Billable</td><td>${escapeHtml(summary.billable)}</td></tr>
-          <tr><td>Non-billable</td><td>${escapeHtml(summary.nonBillable)}</td></tr>
           <tr><td>Sessions</td><td>${summary.sessions}</td></tr>
           <tr><td>Active days</td><td>${summary.activeDays}</td></tr>
           <tr><td>Projects</td><td>${summary.projects}</td></tr>
@@ -475,7 +451,6 @@ export function exportTrackerReport({
               <th>Hours</th>
               <th>Project</th>
               <th>Tags</th>
-              <th>Billable</th>
               <th>Description</th>
             </tr>
           </thead>

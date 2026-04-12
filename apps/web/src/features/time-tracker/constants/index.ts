@@ -1,6 +1,6 @@
 export const TRACKER_COPY = {
   pageTitle: "Track your time",
-  pageDescription: "Capture billable and non-billable work with a timer or manual entry.",
+  pageDescription: "Capture your work with a timer or manual entry.",
   timerTab: "Timer",
   manualTab: "Manual",
   activeTimerTitle: "Active timer",

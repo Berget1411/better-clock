@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import TimeTrackerPage from "@/features/time-tracker/pages/time-tracker-page";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/_app/tracker")({
-  component: TimeTrackerPage,
+  beforeLoad: () => {
+    redirect({ to: "/app", throw: true });
+  },
 });

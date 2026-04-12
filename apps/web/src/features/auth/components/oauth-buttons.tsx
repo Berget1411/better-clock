@@ -33,9 +33,10 @@ export default function OAuthButtons({ invitationId }: { invitationId?: string }
   }
 
   return (
-    <div className="flex gap-2 justify-center items-center my-4 mx-auto">
+    <div className="flex gap-2 justify-center items-center my-4 ">
       <Button
         type="button"
+        size="lg"
         variant="outline"
         className="w-full"
         disabled={loadingProvider !== null}

@@ -1,17 +1,25 @@
 import type { Client } from "@open-learn/api/modules/client/client.schema";
 
 import { useState } from "react";
-import { PencilIcon, SearchIcon, ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, PencilIcon, SearchIcon } from "lucide-react";
+
+import {
+  AppPage,
+  AppPageHeader,
+  AppPageHeaderMeta,
+  AppSurface,
+  AppSurfaceHeader,
+} from "@/components/app-page-shell";
 import { Button } from "@open-learn/ui/components/button";
 import { Checkbox } from "@open-learn/ui/components/checkbox";
-import { Input } from "@open-learn/ui/components/input";
-import { Skeleton } from "@open-learn/ui/components/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@open-learn/ui/components/dropdown-menu";
+import { Input } from "@open-learn/ui/components/input";
+import { Skeleton } from "@open-learn/ui/components/skeleton";
 import {
   Table,
   TableBody,
@@ -21,10 +29,13 @@ import {
   TableRow,
 } from "@open-learn/ui/components/table";
 
-import { useClientsQuery } from "../services/queries";
-import { useCreateClient } from "../services/mutations";
+import { ArchivedBadge } from "@/components/archived-badge";
+import { useTableSelection } from "@/hooks/use-table-selection";
+
 import { ClientInlineEditor } from "../components/client-inline-editor";
 import { ClientRowActions } from "../components/client-row-actions";
+import { useCreateClient } from "../services/mutations";
+import { useClientsQuery } from "../services/queries";
 
 type FilterMode = "active" | "archived" | "all";
 
@@ -39,99 +50,111 @@ export default function ClientsPage() {
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [newName, setNewName] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const showArchived = filter === "archived" || filter === "all";
   const { data: clients, isLoading } = useClientsQuery(showArchived);
   const createClient = useCreateClient();
 
-  const filtered = (clients ?? []).filter((c) => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-    if (filter === "active") return matchesSearch && !c.isArchived;
-    if (filter === "archived") return matchesSearch && c.isArchived;
+  const filtered = (clients ?? []).filter((client) => {
+    const matchesSearch = client.name.toLowerCase().includes(search.toLowerCase());
+
+    if (filter === "active") {
+      return matchesSearch && !client.isArchived;
+    }
+
+    if (filter === "archived") {
+      return matchesSearch && client.isArchived;
+    }
+
     return matchesSearch;
   });
 
+  const { selectedIds, toggleSelect, toggleSelectAll, allSelected, someSelected } =
+    useTableSelection({ items: filtered });
+
   async function handleAdd() {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      return;
+    }
+
     await createClient.mutateAsync({ name: newName.trim(), currency: "USD" });
     setNewName("");
   }
 
-  function toggleSelect(id: number) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  function toggleSelectAll() {
-    if (selectedIds.size === filtered.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filtered.map((c) => c.id)));
-    }
-  }
-
-  const allSelected = filtered.length > 0 && selectedIds.size === filtered.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < filtered.length;
+  const activeCount = (clients ?? []).filter((client) => !client.isArchived).length;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Clients</h1>
+    <AppPage>
+      <AppPageHeader
+        title="Clients"
+        description="Keep client records clean so projects, billing, and reporting inherit the right context."
+      >
+        <AppPageHeaderMeta
+          items={[
+            { label: "Total", value: String(clients?.length ?? 0) },
+            { label: "Active", value: String(activeCount) },
+            { label: "Selected", value: String(selectedIds.size) },
+          ]}
+        />
+      </AppPageHeader>
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {/* Filter dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1">
-                {FILTER_LABELS[filter]}
-                <ChevronDownIcon className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => setFilter("active")}>Show active</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter("archived")}>
-                Show archived
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter("all")}>Show all</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <AppSurface>
+        <AppSurfaceHeader
+          label="Directory"
+          title="Filter and maintain client records"
+          description="Search fast, change archive visibility, and add a new client from the same workspace."
+        />
 
-          {/* Search */}
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col gap-3 border-b border-border/60 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  {FILTER_LABELS[filter]}
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setFilter("active")}>Show active</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("archived")}>
+                  Show archived
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("all")}>Show all</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="relative">
+              <SearchIcon className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by name"
+                className="w-56 pl-8"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name"
-              className="pl-8 w-56"
+              value={newName}
+              onChange={(event) => setNewName(event.target.value)}
+              placeholder="Add new client"
+              className="w-52"
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  void handleAdd();
+                }
+              }}
             />
+            <Button
+              onClick={() => void handleAdd()}
+              disabled={!newName.trim() || createClient.isPending}
+            >
+              Add client
+            </Button>
           </div>
         </div>
 
-        {/* Add new client */}
-        <div className="flex items-center gap-2">
-          <Input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Add new client"
-            className="w-52"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAdd();
-            }}
-          />
-          <Button onClick={handleAdd} disabled={!newName.trim() || createClient.isPending}>
-            Add client
-          </Button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -178,8 +201,8 @@ export default function ClientsPage() {
             )}
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </AppSurface>
+    </AppPage>
   );
 }
 
@@ -202,11 +225,7 @@ function ClientTableRow({ client, selected, onToggleSelect, onEdit }: ClientTabl
       </TableCell>
       <TableCell>
         <span className="font-medium">{client.name}</span>
-        {client.isArchived && (
-          <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-            archived
-          </span>
-        )}
+        {client.isArchived ? <ArchivedBadge className="ml-2" /> : null}
       </TableCell>
       <TableCell className="text-muted-foreground">{client.address ?? ""}</TableCell>
       <TableCell>{client.currency}</TableCell>
@@ -231,8 +250,8 @@ function ClientTableRow({ client, selected, onToggleSelect, onEdit }: ClientTabl
 function ClientTableSkeleton() {
   return (
     <>
-      {[1, 2, 3].map((i) => (
-        <TableRow key={i}>
+      {[1, 2, 3].map((item) => (
+        <TableRow key={item}>
           <TableCell>
             <Skeleton className="size-4" />
           </TableCell>

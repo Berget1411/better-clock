@@ -41,7 +41,6 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --tracked: oklch(0.606 0.106 183.474);
-  --billable: oklch(0.633 0.134 237.982);
 }
 
 .dark {
@@ -105,7 +104,6 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
-  --color-billable: var(--billable);
   --color-tracked: var(--tracked);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);

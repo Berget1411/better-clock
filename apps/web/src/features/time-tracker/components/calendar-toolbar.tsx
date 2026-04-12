@@ -1,5 +1,4 @@
 import type { TrackerProject } from "@open-learn/api/modules/time-tracker/time-tracker.schema";
-import type { CalendarBillableFilter } from "../constants/calendar";
 import type { CalendarViewKey } from "../utils/calendar";
 
 import { Badge } from "@open-learn/ui/components/badge";
@@ -14,21 +13,15 @@ import {
 } from "@open-learn/ui/components/select";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
-import {
-  CALENDAR_BILLABLE_FILTER_OPTIONS,
-  CALENDAR_COPY,
-  CALENDAR_VIEW_OPTIONS,
-} from "../constants/calendar";
+import { CALENDAR_COPY, CALENDAR_VIEW_OPTIONS } from "../constants/calendar";
 
 interface CalendarToolbarProps {
   title: string;
   view: CalendarViewKey;
   projectFilter: string;
-  billableFilter: CalendarBillableFilter;
   projects: TrackerProject[];
   onViewChange: (view: CalendarViewKey) => void;
   onProjectFilterChange: (value: string) => void;
-  onBillableFilterChange: (value: CalendarBillableFilter) => void;
   onToday: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -38,11 +31,9 @@ export function CalendarToolbar({
   title,
   view,
   projectFilter,
-  billableFilter,
   projects,
   onViewChange,
   onProjectFilterChange,
-  onBillableFilterChange,
   onToday,
   onPrevious,
   onNext,
@@ -99,22 +90,6 @@ export function CalendarToolbar({
             {projects.map((project) => (
               <SelectItem key={project.id} value={String(project.id)}>
                 {project.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={billableFilter}
-          onValueChange={(value) => onBillableFilterChange(value as CalendarBillableFilter)}
-        >
-          <SelectTrigger className="h-8 min-w-36">
-            <SelectValue placeholder="All time" />
-          </SelectTrigger>
-          <SelectContent align="end">
-            {CALENDAR_BILLABLE_FILTER_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
               </SelectItem>
             ))}
           </SelectContent>

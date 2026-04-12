@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import TeamsPage from "@/features/organization/pages/teams-page";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/_app/teams")({
-  component: TeamsPage,
+  beforeLoad: () => {
+    redirect({ to: "/app/manage/teams", throw: true });
+  },
 });

@@ -175,7 +175,7 @@ export function TeamSwitcher() {
               placeholder="Acme Inc."
               value={newOrgName}
               onChange={(e) => setNewOrgName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreateOrg()}
+              onKeyDown={(e) => e.key === "Enter" && void handleCreateOrg()}
             />
           </div>
           <DialogFooter>

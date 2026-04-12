@@ -1,7 +1,7 @@
 import type { TrackerProjectFull } from "@open-learn/api/modules/time-tracker/time-tracker.schema";
 
 import { useMemo, useState } from "react";
-import { ArrowUpDownIcon, ArrowUpIcon, PencilIcon, SearchIcon, StarIcon } from "lucide-react";
+import { ArrowUpDownIcon, ArrowUpIcon, PencilIcon, SearchIcon } from "lucide-react";
 
 import {
   AppPage,
@@ -333,8 +333,6 @@ interface ProjectTableRowProps {
 }
 
 function ProjectTableRow({ project, selected, onToggleSelect, onEdit }: ProjectTableRowProps) {
-  const [starred, setStarred] = useState(false);
-
   return (
     <TableRow className="group">
       <TableCell>
@@ -359,17 +357,6 @@ function ProjectTableRow({ project, selected, onToggleSelect, onEdit }: ProjectT
       <TableCell className="capitalize">{project.access}</TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
-            onClick={() => setStarred((current) => !current)}
-            aria-label="Star project"
-          >
-            <StarIcon
-              className={`size-4 transition-colors ${starred ? "fill-yellow-400 text-yellow-400" : ""}`}
-            />
-          </Button>
           <Button
             variant="ghost"
             size="icon"

@@ -75,7 +75,7 @@ export default function SettingsDialog({
       }
 
       if (error) {
-        setCanChangePassword(true);
+        setCanChangePassword(false);
         return;
       }
 

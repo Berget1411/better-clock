@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface UseTableSelectionOptions<T extends { id: number }> {
   items: T[];
@@ -16,6 +16,14 @@ export function useTableSelection<T extends { id: number }>({
   items,
 }: UseTableSelectionOptions<T>): UseTableSelectionReturn {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const visibleIds = new Set(items.map((item) => item.id));
+    setSelectedIds((prev) => {
+      const next = new Set([...prev].filter((id) => visibleIds.has(id)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [items]);
 
   function toggleSelect(id: number) {
     setSelectedIds((prev) => {

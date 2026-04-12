@@ -44,7 +44,7 @@ export async function sendInvitationEmail({
         <p style="margin-bottom: 16px; color: #555;">
           <strong>${safeInviterName}</strong> has invited you to join <strong>${safeOrgName}</strong>.
         </p>
-        <a href="${inviteLink}"
+        <a href="${escapeHtml(inviteLink)}"
            style="display: inline-block; padding: 10px 20px; background: #18a0a0; color: #fff;
                   text-decoration: none; font-weight: 600; border-radius: 4px;">
           Accept Invitation

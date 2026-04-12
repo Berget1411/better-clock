@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { ArrowUpRightIcon, ChevronRightIcon, ImageOffIcon } from "lucide-react";
 import { LazyMotion, domAnimation, m } from "motion/react";
+import { useTheme } from "next-themes";
 
 import { Badge } from "@open-learn/ui/components/badge";
 import { Button } from "@open-learn/ui/components/button";
 import { Link } from "@tanstack/react-router";
 
-import heroAvif from "@/public/example-hero.avif";
-import heroAvif832 from "@/public/example-hero-832.avif";
-import heroWebp from "@/public/example-hero.webp";
-import heroWebp832 from "@/public/example-hero-832.webp";
-import heroPng from "@/public/example-hero.png";
+import heroDark from "@/public/hero-image-dark.png";
+import heroLight from "@/public/hero-image-light.png";
 import logoSvg from "@/public/logo.svg";
 
 const GITHUB_URL = "https://github.com/Berget1411/open-clock";
@@ -30,10 +28,12 @@ function HeroImageFallback() {
 
 export default function HomePage() {
   const [heroError, setHeroError] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const heroSrc = resolvedTheme === "light" ? heroLight : heroDark;
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="min-h-svh bg-background text-foreground">
+      <div className="bg-background text-foreground">
         <m.header
           className="border-b border-border/70"
           initial={{ opacity: 0 }}
@@ -116,7 +116,7 @@ export default function HomePage() {
             </m.div>
 
             <m.div
-              className="ring-1 ring-foreground/10"
+              className="relative ring-1 ring-foreground/10 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-1/3 after:bg-gradient-to-t after:from-background after:to-transparent"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -124,28 +124,14 @@ export default function HomePage() {
               {heroError ? (
                 <HeroImageFallback />
               ) : (
-                <picture>
-                  <source
-                    type="image/avif"
-                    srcSet={`${heroAvif832} 832w, ${heroAvif} 1664w`}
-                    sizes="(max-width: 1023px) 100vw, 960px"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet={`${heroWebp832} 832w, ${heroWebp} 1664w`}
-                    sizes="(max-width: 1023px) 100vw, 960px"
-                  />
-                  <img
-                    src={heroPng}
-                    alt="better clock dashboard showing tracked hours, recent activity, and reporting views."
-                    width={1664}
-                    height={1720}
-                    loading="lazy"
-                    decoding="async"
-                    onError={() => setHeroError(true)}
-                    className="block h-auto w-full bg-muted/20"
-                  />
-                </picture>
+                <img
+                  src={heroSrc}
+                  alt="better clock dashboard showing tracked hours, recent activity, and reporting views."
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setHeroError(true)}
+                  className="block h-auto w-full bg-muted/20"
+                />
               )}
             </m.div>
           </section>

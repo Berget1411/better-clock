@@ -5,6 +5,10 @@ export const env = createEnv({
   clientPrefix: "VITE_",
   client: {
     VITE_SERVER_URL: z.url(),
+    VITE_AI_ENABLED: z
+      .string()
+      .optional()
+      .transform((v) => v === "true"),
   },
   runtimeEnv: (import.meta as any).env,
   emptyStringAsUndefined: true,

@@ -29,7 +29,9 @@ export const server = await Worker("server", {
     CORS_ORIGIN: alchemy.env.CORS_ORIGIN!,
     BETTER_AUTH_SECRET: alchemy.secret.env.BETTER_AUTH_SECRET!,
     BETTER_AUTH_URL: alchemy.env.BETTER_AUTH_URL!,
-    GOOGLE_GENERATIVE_AI_API_KEY: alchemy.secret.env.GOOGLE_GENERATIVE_AI_API_KEY!,
+    ...(process.env.GOOGLE_GENERATIVE_AI_API_KEY
+      ? { GOOGLE_GENERATIVE_AI_API_KEY: alchemy.secret.env.GOOGLE_GENERATIVE_AI_API_KEY! }
+      : {}),
     POLAR_ACCESS_TOKEN: alchemy.secret.env.POLAR_ACCESS_TOKEN!,
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
     GOOGLE_CLIENT_ID: alchemy.env.GOOGLE_CLIENT_ID!,
@@ -49,6 +51,7 @@ export const web = await Vite("web", {
   assets: "dist",
   bindings: {
     VITE_SERVER_URL: server.url,
+    VITE_AI_ENABLED: process.env.VITE_AI_ENABLED ?? "false",
     DEV_PORT: "3001",
   },
 });

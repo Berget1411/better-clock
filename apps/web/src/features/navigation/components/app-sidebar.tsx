@@ -23,8 +23,9 @@ import { TeamSwitcher } from "./team-switcher";
 import NavMain from "./nav-main";
 import NavUser from "./nav-user";
 import NavManage from "./nav-manage";
+import { env } from "@open-learn/env/web";
 
-const navMainItems = [
+const baseNavMainItems = [
   {
     title: "Dashboard",
     to: "/app",
@@ -50,12 +51,17 @@ const navMainItems = [
     to: "/app/calendar",
     icon: CalendarIcon,
   },
-  {
-    title: "AI Chat",
-    to: "/app/ai",
-    icon: BotIcon,
-  },
 ] as const;
+
+const aiNavItem = {
+  title: "AI Chat",
+  to: "/app/ai",
+  icon: BotIcon,
+} as const;
+
+const navMainItems = env.VITE_AI_ENABLED
+  ? ([...baseNavMainItems, aiNavItem] as const)
+  : baseNavMainItems;
 
 const navManageItems = [
   {

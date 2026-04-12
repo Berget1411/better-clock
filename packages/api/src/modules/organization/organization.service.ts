@@ -1,4 +1,5 @@
 import { auth } from "@open-learn/auth";
+import { buildSessionTokenCookieHeader } from "@open-learn/auth/lib/session-cookie";
 
 import type {
   CancelInvitationInput,
@@ -11,7 +12,7 @@ import type {
 // Helper to build fake request headers for Better Auth server-side calls
 function buildHeaders(sessionToken: string) {
   return new Headers({
-    cookie: `better-auth.session_token=${sessionToken}`,
+    cookie: buildSessionTokenCookieHeader(sessionToken),
   });
 }
 

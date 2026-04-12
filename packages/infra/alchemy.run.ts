@@ -36,8 +36,6 @@ export const server = await Worker("server", {
     POLAR_SUCCESS_URL: alchemy.env.POLAR_SUCCESS_URL!,
     GOOGLE_CLIENT_ID: alchemy.env.GOOGLE_CLIENT_ID!,
     GOOGLE_CLIENT_SECRET: alchemy.secret.env.GOOGLE_CLIENT_SECRET!,
-    GITHUB_CLIENT_ID: alchemy.env.GITHUB_CLIENT_ID!,
-    GITHUB_CLIENT_SECRET: alchemy.secret.env.GITHUB_CLIENT_SECRET!,
     GMAIL_USER: alchemy.env.GMAIL_USER!,
     GMAIL_APP_PASSWORD: alchemy.secret.env.GMAIL_APP_PASSWORD!,
   },

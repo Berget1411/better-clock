@@ -216,9 +216,9 @@ export function MembersTable({ orgId }: { orgId: string }) {
   }
 
   return (
-    <div className="space-y-4">
+    <>
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-4">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -248,100 +248,94 @@ export function MembersTable({ orgId }: { orgId: string }) {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-10" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredRows.length === 0 ? (
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="w-10" />
+              <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                No members found
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredRows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  No members found
+          ) : (
+            filteredRows.map((row) => (
+              <TableRow key={row.kind === "member" ? row.id : `inv-${row.id}`}>
+                <TableCell className="font-medium">
+                  {row.kind === "member" ? row.user.name : "—"}
                 </TableCell>
-              </TableRow>
-            ) : (
-              filteredRows.map((row) => (
-                <TableRow key={row.kind === "member" ? row.id : `inv-${row.id}`}>
-                  <TableCell className="font-medium">
-                    {row.kind === "member" ? row.user.name : "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {row.kind === "member" ? row.user.email : row.email}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={row.role === "owner" ? "default" : "secondary"}>
-                      {row.role}
+                <TableCell className="text-muted-foreground">
+                  {row.kind === "member" ? row.user.email : row.email}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={row.role === "owner" ? "default" : "secondary"}>{row.role}</Badge>
+                </TableCell>
+                <TableCell>
+                  {row.kind === "invitation" ? (
+                    <Badge variant="outline">Pending invite</Badge>
+                  ) : (
+                    <Badge variant="outline" className="border-green-200 text-green-600">
+                      Active
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {row.kind === "invitation" ? (
-                      <Badge variant="outline">Pending invite</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-green-600 border-green-200">
-                        Active
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {row.role !== "owner" && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-8">
-                            <MoreHorizontal className="size-4" />
-                            <span className="sr-only">Actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {row.kind === "member" && (
-                            <>
-                              {row.role !== "admin" && (
-                                <DropdownMenuItem onClick={() => handleChangeRole(row.id, "admin")}>
-                                  Make admin
-                                </DropdownMenuItem>
-                              )}
-                              {row.role !== "member" && (
-                                <DropdownMenuItem
-                                  onClick={() => handleChangeRole(row.id, "member")}
-                                >
-                                  Make member
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleRemoveMember(row.id)}
-                              >
-                                Remove
+                  )}
+                </TableCell>
+                <TableCell>
+                  {row.role !== "owner" && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="size-8">
+                          <MoreHorizontal className="size-4" />
+                          <span className="sr-only">Actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {row.kind === "member" && (
+                          <>
+                            {row.role !== "admin" && (
+                              <DropdownMenuItem onClick={() => handleChangeRole(row.id, "admin")}>
+                                Make admin
                               </DropdownMenuItem>
-                            </>
-                          )}
-                          {row.kind === "invitation" && (
+                            )}
+                            {row.role !== "member" && (
+                              <DropdownMenuItem onClick={() => handleChangeRole(row.id, "member")}>
+                                Make member
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => handleCancelInvitation(row.id)}
+                              onClick={() => handleRemoveMember(row.id)}
                             >
-                              Cancel invite
+                              Remove
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                          </>
+                        )}
+                        {row.kind === "invitation" && (
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleCancelInvitation(row.id)}
+                          >
+                            Cancel invite
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
 
       <InviteModal open={inviteOpen} orgId={orgId} onClose={() => setInviteOpen(false)} />
-    </div>
+    </>
   );
 }

@@ -77,7 +77,6 @@ export function getDefaultManualValues() {
     projectId: null as number | null,
     taskId: null as number | null,
     tagIds: [] as number[],
-    isBillable: false,
   };
 }
 
@@ -87,7 +86,6 @@ export function getTimerFormValues(entry?: TrackerEntry | null) {
     projectId: entry?.project?.id ?? null,
     taskId: entry?.task?.id ?? null,
     tagIds: entry?.tags.map((tag) => tag.id) ?? [],
-    isBillable: entry?.isBillable ?? false,
   };
 }
 
@@ -103,7 +101,6 @@ export function getEditableEntryValues(entry: TrackerEntry) {
     projectId: entry.project?.id ?? null,
     taskId: entry.task?.id ?? null,
     tagIds: entry.tags.map((tag) => tag.id),
-    isBillable: entry.isBillable,
   };
 }
 

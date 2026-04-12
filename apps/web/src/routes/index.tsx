@@ -7,12 +7,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "Open Clock | Home",
+        title: "better clock | Home",
       },
       {
         name: "description",
-        content:
-          "Track time with clear project context, honest billable reporting, and a calm workspace.",
+        content: "Track time with clear project context and a calm workspace.",
       },
     ],
   }),

@@ -13,6 +13,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AppPage,
+  AppPageHeader,
+  AppPageHeaderMeta,
+  AppSurface,
+  AppSurfaceHeader,
+} from "@/components/app-page-shell";
 import { Badge } from "@open-learn/ui/components/badge";
 import { Button } from "@open-learn/ui/components/button";
 import {
@@ -63,17 +70,11 @@ import {
 } from "../utils/reports";
 
 const ReportsBarChart = lazy(() =>
-  import("../components/reports-charts").then((m) => ({ default: m.ReportsBarChart })),
+  import("../components/charts").then((module) => ({ default: module.TrackerBarChart })),
 );
 const ReportsPieChart = lazy(() =>
-  import("../components/reports-charts").then((m) => ({ default: m.ReportsPieChart })),
+  import("../components/charts").then((module) => ({ default: module.ReportsPieChart })),
 );
-
-const billableOptions = [
-  { value: "all", label: "Billability" },
-  { value: "billable", label: "Billable only" },
-  { value: "non-billable", label: "Non-billable" },
-] as const;
 
 const initialRange = getReportPresetRange("last-month");
 
@@ -83,16 +84,11 @@ function addDays(date: Date, days: number) {
   return result;
 }
 
-// ─── Reducer ──────────────────────────────────────────────────────────────────
-
-type BillableFilter = (typeof billableOptions)[number]["value"];
-
 interface FiltersState {
   preset: ReportPresetKey;
   fromInput: string;
   toInput: string;
   projectFilter: string;
-  billableFilter: BillableFilter;
   searchValue: string;
 }
 
@@ -101,7 +97,6 @@ type FiltersAction =
   | { type: "SET_CUSTOM_FROM"; fromInput: string }
   | { type: "SET_CUSTOM_TO"; toInput: string }
   | { type: "SET_PROJECT_FILTER"; projectFilter: string }
-  | { type: "SET_BILLABLE_FILTER"; billableFilter: BillableFilter }
   | { type: "SET_SEARCH"; searchValue: string }
   | { type: "RESET_FILTERS" }
   | { type: "SHIFT_RANGE"; fromInput: string; toInput: string };
@@ -121,12 +116,10 @@ function filtersReducer(state: FiltersState, action: FiltersAction): FiltersStat
       return { ...state, preset: "custom", toInput: action.toInput };
     case "SET_PROJECT_FILTER":
       return { ...state, projectFilter: action.projectFilter };
-    case "SET_BILLABLE_FILTER":
-      return { ...state, billableFilter: action.billableFilter };
     case "SET_SEARCH":
       return { ...state, searchValue: action.searchValue };
     case "RESET_FILTERS":
-      return { ...state, projectFilter: "all", billableFilter: "all", searchValue: "" };
+      return { ...state, projectFilter: "all", searchValue: "" };
     case "SHIFT_RANGE":
       return { ...state, preset: "custom", fromInput: action.fromInput, toInput: action.toInput };
     default:
@@ -139,15 +132,12 @@ const initialFiltersState: FiltersState = {
   fromInput: initialRange.fromInput,
   toInput: initialRange.toInput,
   projectFilter: "all",
-  billableFilter: "all",
   searchValue: "",
 };
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function ReportsPage() {
   const [filters, dispatch] = useReducer(filtersReducer, initialFiltersState);
-  const { preset, fromInput, toInput, projectFilter, billableFilter, searchValue } = filters;
+  const { preset, fromInput, toInput, projectFilter, searchValue } = filters;
 
   const resolvedRange = useMemo(() => resolveReportRange(fromInput, toInput), [fromInput, toInput]);
   const rangeLabel = useMemo(
@@ -164,14 +154,6 @@ export default function ReportsPage() {
         return false;
       }
 
-      if (billableFilter === "billable" && !entry.isBillable) {
-        return false;
-      }
-
-      if (billableFilter === "non-billable" && entry.isBillable) {
-        return false;
-      }
-
       if (!query) {
         return true;
       }
@@ -182,7 +164,7 @@ export default function ReportsPage() {
 
       return haystack.includes(query);
     });
-  }, [billableFilter, projectFilter, searchValue, trackerOverview.data?.entries]);
+  }, [projectFilter, searchValue, trackerOverview.data?.entries]);
 
   const metrics = useMemo(
     () =>
@@ -277,92 +259,97 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-3 overflow-x-hidden text-[13px]">
-      <section className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Button variant="outline" size="sm" className="h-9 px-3 uppercase">
-            Time report
-          </Button>
-          <Badge variant="outline" className="h-9 rounded-none px-3 text-[11px] uppercase">
-            Summary
-          </Badge>
-          <Badge
-            variant="outline"
-            className="h-9 rounded-none px-3 text-[11px] text-muted-foreground"
-          >
-            Detailed
-          </Badge>
-          <Badge
-            variant="outline"
-            className="h-9 rounded-none px-3 text-[11px] text-muted-foreground"
-          >
-            Weekly
-          </Badge>
-          <Badge
-            variant="outline"
-            className="h-9 rounded-none px-3 text-[11px] text-muted-foreground"
-          >
-            Shared
-          </Badge>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 xl:justify-end">
-          <div className="flex min-w-0 flex-wrap items-center sm:flex-nowrap">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 rounded-none border-r-0 px-3"
-              onClick={() => shiftRange(-1)}
-              aria-label="Previous period"
-            >
-              <ChevronLeftIcon className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 max-w-full rounded-none px-3 font-normal"
-            >
-              <CalendarRangeIcon className="size-4" />
-              {rangeLabel}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 rounded-none border-l-0 px-3"
-              onClick={() => shiftRange(1)}
-              aria-label="Next period"
-            >
-              <ChevronRightIcon className="size-4" />
-            </Button>
-          </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 rounded-none px-3">
-                <DownloadIcon className="size-4" />
-                Export
+    <AppPage className="gap-4 overflow-x-hidden text-[13px]">
+      <AppPageHeader
+        title="Reports"
+        description="Refine the time log, review project mix, and export clean reporting data."
+        actions={
+          <>
+            <div className="flex min-w-0 flex-wrap items-center sm:flex-nowrap">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 rounded-none border-r-0 px-3"
+                onClick={() => shiftRange(-1)}
+                aria-label="Previous period"
+              >
+                <ChevronLeftIcon className="size-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-none">
-              <DropdownMenuItem onClick={() => handleExport("csv")}>
-                <FileTextIcon className="size-4" />
-                Export CSV
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("excel")}>
-                <FileSpreadsheetIcon className="size-4" />
-                Export Excel
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleExport("json")}>
-                <FileJson2Icon className="size-4" />
-                Export JSON
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </section>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 max-w-full rounded-none px-3 font-normal"
+              >
+                <CalendarRangeIcon className="size-4" />
+                {rangeLabel}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 rounded-none border-l-0 px-3"
+                onClick={() => shiftRange(1)}
+                aria-label="Next period"
+              >
+                <ChevronRightIcon className="size-4" />
+              </Button>
+            </div>
 
-      <Card className="overflow-hidden border-border/70 bg-muted/10 py-0">
-        <CardContent className="flex flex-wrap gap-2 p-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 rounded-none px-3">
+                  <DownloadIcon className="size-4" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-none">
+                <DropdownMenuItem onClick={() => handleExport("csv")}>
+                  <FileTextIcon className="size-4" />
+                  Export CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport("excel")}>
+                  <FileSpreadsheetIcon className="size-4" />
+                  Export Excel
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport("json")}>
+                  <FileJson2Icon className="size-4" />
+                  Export JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        }
+      >
+        <AppPageHeaderMeta
+          items={[
+            {
+              label: "Preset",
+              value:
+                REPORT_PRESET_OPTIONS.find((option) => option.key === preset)?.label ?? "Custom",
+            },
+            { label: "Sessions", value: String(metrics.totalSessions) },
+            { label: "Projects", value: String(metrics.projectCount) },
+          ]}
+        />
+      </AppPageHeader>
+
+      <AppSurface className="overflow-hidden border-border/70 bg-muted/10">
+        <AppSurfaceHeader
+          label="Filters"
+          title="Refine the report"
+          description="Keep the chart, detailed table, and export output aligned from one focused control row."
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 rounded-none px-3"
+              onClick={resetFilters}
+            >
+              Reset filters
+            </Button>
+          }
+        />
+
+        <div className="flex flex-wrap gap-2 p-3">
           <div className="min-w-0 flex-1 basis-[180px] sm:basis-[160px]">
             <CompactSelect
               value={preset}
@@ -412,22 +399,6 @@ export default function ReportsPage() {
             </CompactSelect>
           </div>
 
-          <div className="min-w-0 flex-1 basis-[180px] sm:basis-[160px]">
-            <CompactSelect
-              value={billableFilter}
-              onValueChange={(value) =>
-                dispatch({ type: "SET_BILLABLE_FILTER", billableFilter: value as BillableFilter })
-              }
-              ariaLabel="Filter by billability"
-            >
-              {billableOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </CompactSelect>
-          </div>
-
           <div className="min-w-0 flex-[2_1_220px] basis-[220px]">
             <Input
               value={searchValue}
@@ -438,27 +409,13 @@ export default function ReportsPage() {
               className="h-9 rounded-none bg-background text-xs"
             />
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 rounded-none px-3"
-            onClick={resetFilters}
-          >
-            Reset filters
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </AppSurface>
 
       <Card className="overflow-hidden border-border/70 py-0">
         <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/20 px-3 py-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             <InlineMetric label="Total" value={formatMetricDuration(metrics.totalSeconds)} />
-            <InlineMetric label="Billable" value={formatMetricDuration(metrics.billableSeconds)} />
-            <InlineMetric
-              label="Non-billable"
-              value={formatMetricDuration(metrics.nonBillableSeconds)}
-            />
             <InlineMetric label="Sessions" value={String(metrics.totalSessions)} />
             <InlineMetric label="Projects" value={String(metrics.projectCount)} />
           </div>
@@ -498,7 +455,14 @@ export default function ReportsPage() {
             <>
               <div className="border-b border-border/70 px-3 py-3">
                 <Suspense fallback={<Skeleton className="h-[280px] w-full" />}>
-                  <ReportsBarChart daily={metrics.daily} />
+                  <ReportsBarChart
+                    daily={metrics.daily}
+                    height={280}
+                    barGap={8}
+                    maxBarSize={24}
+                    minTickGap={16}
+                    yAxisWidth={40}
+                  />
                 </Suspense>
               </div>
 
@@ -526,7 +490,6 @@ export default function ReportsPage() {
                           <TableHead>Date</TableHead>
                           <TableHead>Duration</TableHead>
                           <TableHead>Project</TableHead>
-                          <TableHead>Billable</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -544,18 +507,6 @@ export default function ReportsPage() {
                             <TableCell className="text-muted-foreground">{row.dateLabel}</TableCell>
                             <TableCell className="font-medium">{row.duration}</TableCell>
                             <TableCell>{row.projectName}</TableCell>
-                            <TableCell>
-                              <span
-                                className={cn(
-                                  "inline-flex items-center rounded-none border px-2 py-1 text-[11px]",
-                                  row.billableLabel === "Billable"
-                                    ? "border-emerald-600/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                                    : "border-border bg-muted/50 text-muted-foreground",
-                                )}
-                              >
-                                {row.billableLabel}
-                              </span>
-                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -591,7 +542,7 @@ export default function ReportsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AppPage>
   );
 }
 

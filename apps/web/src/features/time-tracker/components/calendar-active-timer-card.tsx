@@ -50,7 +50,7 @@ export function CalendarActiveTimerCard({ activeEntry, now, range }: CalendarAct
       </CardContent>
       <CardFooter className="justify-between gap-2">
         <Button asChild variant="outline" className="h-8 px-3">
-          <Link to="/app/tracker">Open tracker</Link>
+          <Link to="/app">Open tracker</Link>
         </Button>
         <Button
           type="button"

@@ -1,6 +1,8 @@
 import * as React from "react";
 import { MoreHorizontal, Pencil, Plus, Search } from "lucide-react";
 
+import { useTableSelection } from "@/hooks/use-table-selection";
+
 import { Button } from "@open-learn/ui/components/button";
 import { Checkbox } from "@open-learn/ui/components/checkbox";
 import {
@@ -148,7 +150,6 @@ export function TagsTable() {
 
   const [search, setSearch] = React.useState("");
   const [newTagName, setNewTagName] = React.useState("");
-  const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
 
   const tags: Tag[] = tagsQuery.data ?? [];
 
@@ -156,43 +157,8 @@ export function TagsTable() {
     ? tags.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()))
     : tags;
 
-  function toggleSelect(id: number) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
-
-  function toggleSelectAll() {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      const areAllFilteredSelected =
-        filtered.length > 0 && filtered.every((tag) => prev.has(tag.id));
-
-      if (areAllFilteredSelected) {
-        for (const tag of filtered) {
-          next.delete(tag.id);
-        }
-      } else {
-        for (const tag of filtered) {
-          next.add(tag.id);
-        }
-      }
-      return next;
-    });
-  }
-
-  const selectedFilteredCount = filtered.reduce(
-    (count, tag) => (selectedIds.has(tag.id) ? count + 1 : count),
-    0,
-  );
-  const allSelected = filtered.length > 0 && selectedFilteredCount === filtered.length;
-  const someSelected = selectedFilteredCount > 0 && selectedFilteredCount < filtered.length;
+  const { selectedIds, toggleSelect, toggleSelectAll, allSelected, someSelected } =
+    useTableSelection({ items: filtered });
 
   function handleAdd() {
     const name = newTagName.trim();
@@ -213,9 +179,9 @@ export function TagsTable() {
   }
 
   return (
-    <div className="space-y-4">
+    <>
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-4">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -248,57 +214,55 @@ export function TagsTable() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-10">
+              <Checkbox
+                checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                onCheckedChange={toggleSelectAll}
+                aria-label="Select all"
+              />
+            </TableHead>
+            <TableHead>{TAGS_COPY.columnName}</TableHead>
+            <TableHead className="w-24" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tagsQuery.isPending ? (
+            <>
+              {[1, 2, 3].map((i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="size-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-40" />
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              ))}
+            </>
+          ) : filtered.length === 0 ? (
             <TableRow>
-              <TableHead className="w-10">
-                <Checkbox
-                  checked={allSelected ? true : someSelected ? "indeterminate" : false}
-                  onCheckedChange={toggleSelectAll}
-                  aria-label="Select all"
-                />
-              </TableHead>
-              <TableHead>{TAGS_COPY.columnName}</TableHead>
-              <TableHead className="w-24" />
+              <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
+                {TAGS_COPY.emptyState}
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tagsQuery.isPending ? (
-              <>
-                {[1, 2, 3].map((i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="size-4" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-40" />
-                    </TableCell>
-                    <TableCell />
-                  </TableRow>
-                ))}
-              </>
-            ) : filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
-                  {TAGS_COPY.emptyState}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filtered.map((tag) => (
-                <TagRow
-                  key={tag.id}
-                  tag={tag}
-                  selected={selectedIds.has(tag.id)}
-                  onToggleSelect={() => toggleSelect(tag.id)}
-                  onSave={handleSave}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+          ) : (
+            filtered.map((tag) => (
+              <TagRow
+                key={tag.id}
+                tag={tag}
+                selected={selectedIds.has(tag.id)}
+                onToggleSelect={() => toggleSelect(tag.id)}
+                onSave={handleSave}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </>
   );
 }

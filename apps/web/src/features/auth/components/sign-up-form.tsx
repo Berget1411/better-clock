@@ -88,9 +88,7 @@ export default function SignUpForm({
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                or sign up with email
-              </span>
+              <span className=" px-2 text-muted-foreground">or sign up with email</span>
             </div>
           </div>
 

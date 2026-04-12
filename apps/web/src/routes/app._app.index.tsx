@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import TrackerDashboardPage from "@/features/time-tracker/pages/tracker-dashboard-page";
+import TimeTrackerPage from "@/features/time-tracker/pages/time-tracker-page";
 
 export const Route = createFileRoute("/app/_app/")({
-  component: TrackerDashboardPage,
+  component: TimeTrackerPage,
 });

@@ -35,16 +35,16 @@ export async function sendInvitationEmail({
   const safeOrgName = escapeHtml(orgName);
 
   await transporter.sendMail({
-    from: `"Open Clock" <${env.GMAIL_USER}>`,
+    from: `"better clock" <${env.GMAIL_USER}>`,
     to,
-    subject: `You've been invited to join ${orgName} on Open Clock`,
+    subject: `You've been invited to join ${orgName} on better clock`,
     html: `
       <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a1a;">
-        <h2 style="font-size: 20px; margin-bottom: 8px;">You're invited to Open Clock</h2>
+        <h2 style="font-size: 20px; margin-bottom: 8px;">You're invited to better clock</h2>
         <p style="margin-bottom: 16px; color: #555;">
           <strong>${safeInviterName}</strong> has invited you to join <strong>${safeOrgName}</strong>.
         </p>
-        <a href="${inviteLink}"
+        <a href="${escapeHtml(inviteLink)}"
            style="display: inline-block; padding: 10px 20px; background: #18a0a0; color: #fff;
                   text-decoration: none; font-weight: 600; border-radius: 4px;">
           Accept Invitation

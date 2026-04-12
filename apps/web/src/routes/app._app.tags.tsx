@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import TagsPage from "@/features/tags/pages/tags-page";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/_app/tags")({
-  component: TagsPage,
+  beforeLoad: () => {
+    redirect({ to: "/app/manage/tags", throw: true });
+  },
 });

@@ -11,6 +11,7 @@ import { Label } from "@open-learn/ui/components/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@open-learn/ui/components/tabs";
 import { useForm } from "@tanstack/react-form";
 import { KeyRoundIcon, PaletteIcon, UserIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -54,6 +55,39 @@ export default function SettingsDialog({
 }: SettingsDialogProps) {
   const { setTheme, theme } = useTheme();
   const currentTheme = theme ?? "system";
+  const [canChangePassword, setCanChangePassword] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setCanChangePassword(null);
+      return;
+    }
+
+    setCanChangePassword(null);
+
+    let isCancelled = false;
+
+    async function loadAccounts() {
+      const { data, error } = await authClient.listAccounts();
+
+      if (isCancelled) {
+        return;
+      }
+
+      if (error) {
+        setCanChangePassword(false);
+        return;
+      }
+
+      setCanChangePassword(data.some((account) => account.providerId === "credential"));
+    }
+
+    void loadAccounts();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [open, user.email]);
 
   const profileForm = useForm({
     defaultValues: {
@@ -236,103 +270,105 @@ export default function SettingsDialog({
               </profileForm.Subscribe>
             </form>
 
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                passwordForm.handleSubmit();
-              }}
-              className="grid gap-4 border border-border p-4"
-            >
-              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                <KeyRoundIcon className="size-3.5" />
-                Password
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="settings-current-password">Current password</Label>
-                <passwordForm.Field name="currentPassword">
-                  {(field) => (
-                    <>
-                      <Input
-                        id="settings-current-password"
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                      />
-                      {field.state.meta.errors.map((error) => (
-                        <p key={error?.message} className="text-xs text-destructive">
-                          {error?.message}
-                        </p>
-                      ))}
-                    </>
-                  )}
-                </passwordForm.Field>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="settings-new-password">New password</Label>
-                <passwordForm.Field name="newPassword">
-                  {(field) => (
-                    <>
-                      <Input
-                        id="settings-new-password"
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                      />
-                      {field.state.meta.errors.map((error) => (
-                        <p key={error?.message} className="text-xs text-destructive">
-                          {error?.message}
-                        </p>
-                      ))}
-                    </>
-                  )}
-                </passwordForm.Field>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="settings-confirm-password">Confirm new password</Label>
-                <passwordForm.Field name="confirmPassword">
-                  {(field) => (
-                    <>
-                      <Input
-                        id="settings-confirm-password"
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                      />
-                      {field.state.meta.errors.map((error) => (
-                        <p key={error?.message} className="text-xs text-destructive">
-                          {error?.message}
-                        </p>
-                      ))}
-                    </>
-                  )}
-                </passwordForm.Field>
-              </div>
-
-              <passwordForm.Subscribe
-                selector={(state) => ({
-                  canSubmit: state.canSubmit,
-                  isSubmitting: state.isSubmitting,
-                })}
+            {canChangePassword ? (
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  passwordForm.handleSubmit();
+                }}
+                className="grid gap-4 border border-border p-4"
               >
-                {({ canSubmit, isSubmitting }) => (
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                      {isSubmitting ? "Updating..." : "Update password"}
-                    </Button>
-                  </div>
-                )}
-              </passwordForm.Subscribe>
-            </form>
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  <KeyRoundIcon className="size-3.5" />
+                  Password
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="settings-current-password">Current password</Label>
+                  <passwordForm.Field name="currentPassword">
+                    {(field) => (
+                      <>
+                        <Input
+                          id="settings-current-password"
+                          name={field.name}
+                          type="password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(event) => field.handleChange(event.target.value)}
+                        />
+                        {field.state.meta.errors.map((error) => (
+                          <p key={error?.message} className="text-xs text-destructive">
+                            {error?.message}
+                          </p>
+                        ))}
+                      </>
+                    )}
+                  </passwordForm.Field>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="settings-new-password">New password</Label>
+                  <passwordForm.Field name="newPassword">
+                    {(field) => (
+                      <>
+                        <Input
+                          id="settings-new-password"
+                          name={field.name}
+                          type="password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(event) => field.handleChange(event.target.value)}
+                        />
+                        {field.state.meta.errors.map((error) => (
+                          <p key={error?.message} className="text-xs text-destructive">
+                            {error?.message}
+                          </p>
+                        ))}
+                      </>
+                    )}
+                  </passwordForm.Field>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="settings-confirm-password">Confirm new password</Label>
+                  <passwordForm.Field name="confirmPassword">
+                    {(field) => (
+                      <>
+                        <Input
+                          id="settings-confirm-password"
+                          name={field.name}
+                          type="password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(event) => field.handleChange(event.target.value)}
+                        />
+                        {field.state.meta.errors.map((error) => (
+                          <p key={error?.message} className="text-xs text-destructive">
+                            {error?.message}
+                          </p>
+                        ))}
+                      </>
+                    )}
+                  </passwordForm.Field>
+                </div>
+
+                <passwordForm.Subscribe
+                  selector={(state) => ({
+                    canSubmit: state.canSubmit,
+                    isSubmitting: state.isSubmitting,
+                  })}
+                >
+                  {({ canSubmit, isSubmitting }) => (
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                        {isSubmitting ? "Updating..." : "Update password"}
+                      </Button>
+                    </div>
+                  )}
+                </passwordForm.Subscribe>
+              </form>
+            ) : null}
           </TabsContent>
 
           <TabsContent value="theme" className="grid gap-4 border border-border p-4">

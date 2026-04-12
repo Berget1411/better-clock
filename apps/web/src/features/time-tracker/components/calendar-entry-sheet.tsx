@@ -32,7 +32,6 @@ import { useCreateManualEntry, useDeleteEntry, useUpdateEntry } from "../service
 import { getCompatibleTaskId } from "../utils/task-reference";
 import { getDefaultSlotEnd } from "../utils/calendar";
 import { ActivityReferenceInput } from "./activity-reference-input";
-import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactProjectPicker } from "./compact-project-picker";
 import { CompactTagPicker } from "./compact-tag-picker";
 import {
@@ -69,7 +68,6 @@ const calendarEntrySchema = z
     projectId: z.number().nullable(),
     taskId: z.number().nullable(),
     tagIds: z.array(z.number()),
-    isBillable: z.boolean(),
   })
   .superRefine((value, ctx) => {
     const entryRange = getCalendarEntryDateRange(value.date, value.startTime, value.endTime);
@@ -114,7 +112,6 @@ function getInitialValues(
     projectId: null as number | null,
     taskId: null as number | null,
     tagIds: [] as number[],
-    isBillable: false,
   };
 }
 
@@ -151,7 +148,7 @@ export function CalendarEntrySheet({
         projectId: value.projectId,
         taskId: value.taskId,
         tagIds: value.tagIds,
-        isBillable: value.isBillable,
+        isBillable: false,
         startAt: entryRange.startAt.toISOString(),
         endAt: entryRange.endAt.toISOString(),
       };
@@ -359,23 +356,6 @@ export function CalendarEntrySheet({
                       </FieldContent>
                     </Field>
                   </div>
-
-                  <Field>
-                    <FieldLabel className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      Billing
-                    </FieldLabel>
-                    <FieldContent>
-                      <form.Field name="isBillable">
-                        {(billableField) => (
-                          <CompactBillableToggle
-                            checked={billableField.state.value}
-                            onCheckedChange={billableField.handleChange}
-                            className="h-10"
-                          />
-                        )}
-                      </form.Field>
-                    </FieldContent>
-                  </Field>
                 </>
               )}
             </form.Subscribe>

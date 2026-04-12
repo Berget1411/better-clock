@@ -21,7 +21,6 @@ import {
   getDefaultManualValues,
 } from "../utils/date-time";
 import { ActivityReferenceInput } from "./activity-reference-input";
-import { CompactBillableToggle } from "./compact-billable-toggle";
 import { CompactDatePicker } from "./compact-date-picker";
 import { CompactProjectPicker } from "./compact-project-picker";
 import { CompactTagPicker } from "./compact-tag-picker";
@@ -35,7 +34,6 @@ const manualEntrySchema = z
     projectId: z.number().nullable(),
     taskId: z.number().nullable(),
     tagIds: z.array(z.number()),
-    isBillable: z.boolean(),
   })
   .superRefine((value, ctx) => {
     const startAt = combineDateAndTime(value.date, value.startTime);
@@ -76,7 +74,7 @@ export function ManualEntryForm({ projects, tasks, tags, range }: ManualEntryFor
         projectId: value.projectId,
         taskId: value.taskId,
         tagIds: value.tagIds,
-        isBillable: value.isBillable,
+        isBillable: false,
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
       });
@@ -161,15 +159,6 @@ export function ManualEntryForm({ projects, tasks, tags, range }: ManualEntryFor
                             onChange={tagField.handleChange}
                             tags={tags}
                             range={range}
-                          />
-                        )}
-                      </form.Field>
-
-                      <form.Field name="isBillable">
-                        {(billableField) => (
-                          <CompactBillableToggle
-                            checked={billableField.state.value}
-                            onCheckedChange={billableField.handleChange}
                           />
                         )}
                       </form.Field>

@@ -31,7 +31,6 @@ export interface CalendarEntryEventResource {
   taskTitle: string | null;
   taskDisplayKey: string | null;
   tagNames: string[];
-  isBillable: boolean;
   isActive: boolean;
   durationSeconds: number;
   canEdit: boolean;
@@ -102,7 +101,6 @@ function toCalendarEvent(entry: TrackerEntry, options?: { isActive?: boolean; no
       taskTitle: entry.task?.title ?? null,
       taskDisplayKey: entry.task?.displayKey ?? null,
       tagNames: entry.tags.map((tag) => tag.name),
-      isBillable: entry.isBillable,
       isActive,
       durationSeconds: isActive
         ? getElapsedSeconds(entry.startAt, now)
@@ -198,9 +196,7 @@ export function getCalendarEventClassName(event: CalendarEntryEvent) {
     return "calendar-entry-event calendar-entry-event--active";
   }
 
-  return event.resource.isBillable
-    ? "calendar-entry-event calendar-entry-event--billable"
-    : "calendar-entry-event calendar-entry-event--tracked";
+  return "calendar-entry-event calendar-entry-event--tracked";
 }
 
 export function formatCalendarEventDuration(totalSeconds: number) {

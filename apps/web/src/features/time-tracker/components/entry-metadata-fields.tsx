@@ -6,7 +6,6 @@ import type { TrackerOverviewRange } from "../utils/date-time";
 
 import { Field, FieldError, FieldGroup, FieldLabel } from "@open-learn/ui/components/field";
 import { Input } from "@open-learn/ui/components/input";
-import { Switch } from "@open-learn/ui/components/switch";
 
 import { ProjectPicker } from "./project-picker";
 import { TagPicker } from "./tag-picker";
@@ -25,8 +24,6 @@ interface EntryMetadataFieldsProps {
   tagIds: number[];
   onTagIdsChange: (value: number[]) => void;
   tags: TrackerTag[];
-  isBillable: boolean;
-  onBillableChange: (value: boolean) => void;
   range: TrackerOverviewRange;
 }
 
@@ -38,8 +35,6 @@ export function EntryMetadataFields({
   tagIds,
   onTagIdsChange,
   tags,
-  isBillable,
-  onBillableChange,
   range,
 }: EntryMetadataFieldsProps) {
   return (
@@ -65,11 +60,6 @@ export function EntryMetadataFields({
       />
 
       <TagPicker value={tagIds} onChange={onTagIdsChange} tags={tags} range={range} />
-
-      <Field orientation="horizontal">
-        <FieldLabel htmlFor="tracker-billable">Billable</FieldLabel>
-        <Switch id="tracker-billable" checked={isBillable} onCheckedChange={onBillableChange} />
-      </Field>
     </FieldGroup>
   );
 }

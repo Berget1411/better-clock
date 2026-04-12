@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { ArrowUpRightIcon, ChevronRightIcon, Clock3Icon, ImageOffIcon } from "lucide-react";
+import { ArrowUpRightIcon, ChevronRightIcon, ImageOffIcon } from "lucide-react";
 import { LazyMotion, domAnimation, m } from "motion/react";
+import { useTheme } from "next-themes";
 
+import { Badge } from "@open-learn/ui/components/badge";
 import { Button } from "@open-learn/ui/components/button";
 import { Link } from "@tanstack/react-router";
 
-import heroAvif from "@/public/example-hero.avif";
-import heroAvif832 from "@/public/example-hero-832.avif";
-import heroWebp from "@/public/example-hero.webp";
-import heroWebp832 from "@/public/example-hero-832.webp";
-import heroPng from "@/public/example-hero.png";
+import heroDark from "@/public/hero-image-dark.png";
+import heroLight from "@/public/hero-image-light.png";
+import logoSvg from "@/public/logo.svg";
 
 const GITHUB_URL = "https://github.com/Berget1411/open-clock";
 
@@ -28,10 +28,12 @@ function HeroImageFallback() {
 
 export default function HomePage() {
   const [heroError, setHeroError] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const heroSrc = resolvedTheme === "light" ? heroLight : heroDark;
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="min-h-svh bg-background text-foreground">
+      <div className="bg-background text-foreground">
         <m.header
           className="border-b border-border/70"
           initial={{ opacity: 0 }}
@@ -41,16 +43,19 @@ export default function HomePage() {
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <Link
               to="/"
-              aria-label="Open Clock home"
+              aria-label="better clock home"
               className="inline-flex min-h-11 min-w-0 items-center gap-3 text-sm font-medium transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
               <span
-                className="flex size-9 shrink-0 items-center justify-center border border-border bg-muted text-foreground"
+                className="flex size-9 shrink-0 items-center justify-center border border-border bg-muted"
                 aria-hidden="true"
               >
-                <Clock3Icon className="size-4" />
+                <img src={logoSvg} alt="" className="size-9 dark:invert" />
               </span>
-              <span className="min-w-0 truncate">Open Clock</span>
+              <span className="min-w-0 truncate">better clock</span>
+              <Badge variant="secondary" className="shrink-0 text-[10px]">
+                Beta
+              </Badge>
             </Link>
 
             <nav aria-label="Site navigation">
@@ -60,7 +65,7 @@ export default function HomePage() {
                     href={GITHUB_URL}
                     target="_blank"
                     rel="noreferrer noopener"
-                    aria-label="Open Clock on GitHub (opens in new tab)"
+                    aria-label="better clock on GitHub (opens in new tab)"
                   >
                     <span aria-hidden="true">GitHub</span>
                     <ArrowUpRightIcon className="size-4 rtl:rotate-[270deg]" aria-hidden="true" />
@@ -111,7 +116,7 @@ export default function HomePage() {
             </m.div>
 
             <m.div
-              className="ring-1 ring-foreground/10"
+              className="relative ring-1 ring-foreground/10 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-1/3 after:bg-gradient-to-t after:from-background after:to-transparent"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -119,28 +124,14 @@ export default function HomePage() {
               {heroError ? (
                 <HeroImageFallback />
               ) : (
-                <picture>
-                  <source
-                    type="image/avif"
-                    srcSet={`${heroAvif832} 832w, ${heroAvif} 1664w`}
-                    sizes="(max-width: 1023px) 100vw, 960px"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet={`${heroWebp832} 832w, ${heroWebp} 1664w`}
-                    sizes="(max-width: 1023px) 100vw, 960px"
-                  />
-                  <img
-                    src={heroPng}
-                    alt="Open Clock dashboard showing tracked hours, recent activity, and reporting views."
-                    width={1664}
-                    height={1720}
-                    loading="lazy"
-                    decoding="async"
-                    onError={() => setHeroError(true)}
-                    className="block h-auto w-full bg-muted/20"
-                  />
-                </picture>
+                <img
+                  src={heroSrc}
+                  alt="better clock dashboard showing tracked hours, recent activity, and reporting views."
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setHeroError(true)}
+                  className="block h-auto w-full bg-muted/20"
+                />
               )}
             </m.div>
           </section>
@@ -148,12 +139,12 @@ export default function HomePage() {
 
         <footer className="border-t border-border/70">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 text-xs text-muted-foreground sm:px-6">
-            <p>© 2026 Open Clock</p>
+            <p>© 2026 better clock</p>
             <a
               href={GITHUB_URL}
               target="_blank"
               rel="noreferrer noopener"
-              aria-label="Open Clock on GitHub (opens in new tab)"
+              aria-label="better clock on GitHub (opens in new tab)"
               className="inline-flex min-h-11 items-center gap-2 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
               <span aria-hidden="true">GitHub</span>

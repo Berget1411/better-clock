@@ -40,7 +40,7 @@ export default function HomePage() {
         >
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <Link
-              to="/home"
+              to="/"
               aria-label="Open Clock home"
               className="inline-flex min-h-11 min-w-0 items-center gap-3 text-sm font-medium transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/50"
             >
@@ -67,7 +67,7 @@ export default function HomePage() {
                   </a>
                 </Button>
                 <Button variant="outline" asChild className="h-11 px-4 text-xs">
-                  <Link to="/">Open app</Link>
+                  <Link to="/app">Open app</Link>
                 </Button>
               </div>
             </nav>
@@ -93,7 +93,7 @@ export default function HomePage() {
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 <Button asChild className="group h-11 px-4 text-sm">
-                  <Link to="/">
+                  <Link to="/app">
                     Go to app
                     <ChevronRightIcon
                       className="size-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5"

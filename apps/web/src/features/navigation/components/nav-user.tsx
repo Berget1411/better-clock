@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "@open-learn/ui/components/sidebar";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronsUpDownIcon, LogOutIcon, Settings2Icon, SunMoonIcon } from "lucide-react";
+import { ChevronsUpDownIcon, HomeIcon, LogOutIcon, Settings2Icon, SunMoonIcon } from "lucide-react";
 
 import { useTheme } from "@/components/theme-provider";
 import { AUTH_REDIRECT } from "@/features/auth/constants";
@@ -103,6 +103,12 @@ export default function NavUser() {
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/">
+                    <HomeIcon />
+                    Home
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <SunMoonIcon />

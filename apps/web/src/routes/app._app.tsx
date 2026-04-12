@@ -6,7 +6,7 @@ import {
 } from "@/features/navigation/components/app-layout-shell";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/_app")({
+export const Route = createFileRoute("/app/_app")({
   beforeLoad: async () => {
     const authCtx = await requireAuthBeforeLoad();
     // Best-effort: ensure the user has an active organisation set.

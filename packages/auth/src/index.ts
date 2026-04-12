@@ -22,9 +22,21 @@ const workersDomain = env.CORS_ORIGIN.includes("workers.dev")
   ? `.${new URL(env.CORS_ORIGIN).hostname.split(".").slice(-3).join(".")}`
   : undefined;
 
+// Build the list of trusted origins. Always include the primary CORS_ORIGIN.
+// During local dev the web worker binds VITE_SERVER_URL to localhost:3002 and
+// the browser reaches it from localhost:3001/3003, so we also trust localhost
+// variants to avoid 403 preflight failures against the deployed dev server.
+const trustedOrigins = [
+  env.CORS_ORIGIN,
+  // localhost variants for local development
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+];
+
 export const auth = betterAuth({
   database,
-  trustedOrigins: [env.CORS_ORIGIN],
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
   },

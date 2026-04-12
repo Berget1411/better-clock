@@ -1,6 +1,6 @@
 export const AUTH_REDIRECT = {
-  afterSignIn: "/",
-  afterSignUp: "/",
+  afterSignIn: "/app",
+  afterSignUp: "/app",
   afterSignOut: "/login",
 } as const;
 

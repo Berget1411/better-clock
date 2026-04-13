@@ -4,11 +4,11 @@ import { env } from "@open-learn/env/server";
 import { polar, checkout, portal } from "@polar-sh/better-auth";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { organization } from "better-auth/plugins";
+import { organization, admin } from "better-auth/plugins";
 import { dash } from "@better-auth/infra";
 
 import { polarClient } from "./lib/payments";
-import { sendInvitationEmail } from "./lib/email";
+import { sendInvitationEmail, sendVerificationEmail, sendResetPasswordEmail } from "./lib/email";
 
 const database: BetterAuthOptions["database"] = drizzleAdapter(db, {
   provider: "pg",
@@ -18,7 +18,7 @@ const database: BetterAuthOptions["database"] = drizzleAdapter(db, {
 // Derive shared parent domain for cross-subdomain cookies when deployed on workers.dev.
 // e.g. "https://open-clock-web-dev.ludvig1411.workers.dev" → ".ludvig1411.workers.dev"
 // Falls back to undefined for local development so cookies stay scoped to localhost.
-const workersDomain = env.CORS_ORIGIN.includes("workers.dev")
+const workersDomain = env.CORS_ORIGIN?.includes("workers.dev")
   ? `.${new URL(env.CORS_ORIGIN).hostname.split(".").slice(-3).join(".")}`
   : undefined;
 
@@ -39,6 +39,22 @@ export const auth = betterAuth({
   trustedOrigins,
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }: { user: { email: string }; url: string }) => {
+      await sendResetPasswordEmail({ to: user.email, resetUrl: url });
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }: { user: { email: string }; url: string }) => {
+      // Better Auth builds the url with callbackURL=/ when sendOnSignUp fires because
+      // no callbackURL is provided at sign-up time. Override it to send the user to
+      // the frontend app instead of the server root.
+      const verificationUrl = new URL(url);
+      verificationUrl.searchParams.set("callbackURL", `${env.CORS_ORIGIN}/app`);
+      await sendVerificationEmail({ to: user.email, verificationUrl: verificationUrl.toString() });
+    },
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
   },
   socialProviders: {
     google: {
@@ -107,5 +123,6 @@ export const auth = betterAuth({
       ],
     }),
     dash(),
+    admin(),
   ],
 });

@@ -11,6 +11,7 @@ import { Input } from "@open-learn/ui/components/input";
 import { Label } from "@open-learn/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -18,6 +19,7 @@ import Loader from "@/components/loader";
 import { AUTH_COPY, AUTH_REDIRECT } from "../constants";
 import { authClient } from "@/lib/auth-client";
 import OAuthButtons from "./oauth-buttons";
+import VerifyEmailForm from "./verify-email-form";
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -28,6 +30,7 @@ export default function SignUpForm({
 }) {
   const navigate = useNavigate();
   const { isPending } = authClient.useSession();
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
 
   const form = useForm({
     defaultValues: {
@@ -51,10 +54,10 @@ export default function SignUpForm({
                     : "Failed to accept invitation. Please try again.",
                 );
               }
+              navigate({ to: AUTH_REDIRECT.afterSignUp });
             } else {
-              toast.success("Sign up successful");
+              setPendingVerificationEmail(value.email);
             }
-            navigate({ to: AUTH_REDIRECT.afterSignUp });
           },
           onError: (error) => {
             toast.error(error.error.message ?? error.error.statusText);
@@ -72,6 +75,10 @@ export default function SignUpForm({
   });
 
   if (isPending) return <Loader />;
+
+  if (pendingVerificationEmail) {
+    return <VerifyEmailForm email={pendingVerificationEmail} onBackToSignIn={onSwitchToSignIn} />;
+  }
 
   return (
     <div className="mx-auto mt-10 w-full max-w-md px-6">

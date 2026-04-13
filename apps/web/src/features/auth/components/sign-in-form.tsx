@@ -21,9 +21,11 @@ import OAuthButtons from "./oauth-buttons";
 
 export default function SignInForm({
   onSwitchToSignUp,
+  onForgotPassword,
   invitationId,
 }: {
   onSwitchToSignUp: () => void;
+  onForgotPassword: () => void;
   invitationId?: string;
 }) {
   const navigate = useNavigate();
@@ -56,7 +58,23 @@ export default function SignInForm({
             navigate({ to: AUTH_REDIRECT.afterSignIn });
           },
           onError: (error) => {
-            toast.error(error.error.message ?? error.error.statusText);
+            if (error.error.code === "EMAIL_NOT_VERIFIED") {
+              toast.error("Please verify your email before signing in.", {
+                description: "Check your inbox for a verification link.",
+                action: {
+                  label: "Resend",
+                  onClick: () => {
+                    void authClient.sendVerificationEmail({
+                      email: form.getFieldValue("email"),
+                      callbackURL: window.location.origin + "/app",
+                    });
+                    toast.success("Verification email sent");
+                  },
+                },
+              });
+            } else {
+              toast.error(error.error.message ?? error.error.statusText);
+            }
           },
         },
       );
@@ -142,6 +160,18 @@ export default function SignInForm({
                   </div>
                 )}
               </form.Field>
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="h-auto px-0 text-xs text-muted-foreground"
+                onClick={onForgotPassword}
+              >
+                Forgot password?
+              </Button>
             </div>
 
             <form.Subscribe

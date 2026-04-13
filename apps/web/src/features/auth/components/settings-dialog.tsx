@@ -56,6 +56,7 @@ export default function SettingsDialog({
   const { setTheme, theme } = useTheme();
   const currentTheme = theme ?? "system";
   const [canChangePassword, setCanChangePassword] = useState<boolean | null>(null);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -164,6 +165,23 @@ export default function SettingsDialog({
         }),
     },
   });
+
+  async function handleForgotPassword() {
+    setIsSendingReset(true);
+    try {
+      const { error } = await authClient.requestPasswordReset({
+        email: user.email,
+        redirectTo: window.location.origin + "/reset-password",
+      });
+      if (error) {
+        toast.error(error.message ?? error.statusText);
+      } else {
+        toast.success("Password reset link sent to your email");
+      }
+    } finally {
+      setIsSendingReset(false);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -367,6 +385,18 @@ export default function SettingsDialog({
                     </div>
                   )}
                 </passwordForm.Subscribe>
+
+                <div className="flex justify-start">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto px-0 text-xs text-muted-foreground"
+                    disabled={isSendingReset}
+                    onClick={handleForgotPassword}
+                  >
+                    {isSendingReset ? "Sending reset link..." : "Forgot your current password?"}
+                  </Button>
+                </div>
               </form>
             ) : null}
           </TabsContent>

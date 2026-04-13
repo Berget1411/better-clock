@@ -8,6 +8,7 @@ import {
 } from "@open-learn/ui/components/sidebar";
 
 import { getSidebarSections } from "../app-navigation";
+import { AdminNav } from "./admin-nav";
 import { AppSidebarSection } from "./app-sidebar-section";
 import { TeamSwitcher } from "./team-switcher";
 import NavUser from "./nav-user";
@@ -22,6 +23,7 @@ export default function AppSidebar(props: React.ComponentProps<typeof Sidebar>) 
           <TeamSwitcher />
         </SidebarMenu>
       </SidebarHeader>
+      <AdminNav />
       <SidebarContent>
         {sections.map((section) => (
           <AppSidebarSection key={section.id} section={section} />

@@ -99,11 +99,7 @@ export default function ClientsPage() {
       </AppPageHeader>
 
       <AppSurface>
-        <AppSurfaceHeader
-          label="Directory"
-          title="Filter and maintain client records"
-          description="Search fast, change archive visibility, and add a new client from the same workspace."
-        />
+        <AppSurfaceHeader label="Directory" />
 
         <div className="flex flex-col gap-3 border-b border-border/60 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap items-center gap-2">

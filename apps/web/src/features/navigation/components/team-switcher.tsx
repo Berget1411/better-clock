@@ -1,6 +1,5 @@
 import * as React from "react";
 import { ChevronsUpDown, Plus } from "lucide-react";
-import { Badge } from "@open-learn/ui/components/badge";
 import logoSvg from "@/public/logo.svg";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -113,14 +112,8 @@ export function TeamSwitcher() {
                   <img src={logoSvg} alt="" className="size-6 dark:invert" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="flex items-center gap-1.5 truncate font-semibold">
-                    better clock
-                    <Badge variant="secondary" className="shrink-0 text-[9px] px-1 h-4">
-                      Beta
-                    </Badge>
-                  </span>
-                  <span className="truncate text-xs">
-                    {activeOrg ? `/ ${activeOrg.name}` : "Loading…"}
+                  <span className="truncate font-semibold">
+                    {activeOrg ? activeOrg.name : "Loading…"}
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto" />

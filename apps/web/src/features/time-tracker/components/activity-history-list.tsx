@@ -70,33 +70,33 @@ export function ActivityHistoryList({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {groupedEntries.map((week) => (
-        <section key={week.key} className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-sm font-semibold">{week.label}</h2>
-            <p className="text-sm text-muted-foreground">
-              Week total{" "}
-              <span className="font-medium text-foreground tabular-nums">
+        <section key={week.key} className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {week.label}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium tabular-nums text-foreground">
                 {formatDuration(week.totalSeconds)}
               </span>
             </p>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {week.days.map((day) => (
-              <section key={day.key} className="flex flex-col gap-2">
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <h3 className="text-sm text-muted-foreground">{day.label}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Day total{" "}
-                    <span className="font-medium text-foreground tabular-nums">
+              <section key={day.key} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between py-0.5">
+                  <h3 className="text-xs text-muted-foreground">{day.label}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-medium tabular-nums text-foreground">
                       {formatDuration(day.totalSeconds)}
                     </span>
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   {day.entries.map((entry) => (
                     <ActivityRow
                       key={entry.id}

@@ -2,7 +2,7 @@ import type { TrackerProject } from "@open-learn/api/modules/time-tracker/time-t
 import type { TrackerOverviewRange } from "../utils/date-time";
 
 import { useMemo, useState } from "react";
-import { FolderPlusIcon, PlusCircleIcon } from "lucide-react";
+import { FolderPlusIcon, FolderIcon } from "lucide-react";
 import { Button } from "@open-learn/ui/components/button";
 import { Input } from "@open-learn/ui/components/input";
 import {
@@ -14,6 +14,12 @@ import {
   PopoverTrigger,
 } from "@open-learn/ui/components/popover";
 import { Separator } from "@open-learn/ui/components/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-learn/ui/components/tooltip";
 import { cn } from "@open-learn/ui/lib/utils";
 
 import { useCreateProject } from "../services/mutations";
@@ -31,6 +37,7 @@ export function CompactProjectPicker({
   projects,
   range,
 }: CompactProjectPickerProps) {
+  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [newProjectName, setNewProjectName] = useState("");
   const createProject = useCreateProject(range);
@@ -46,17 +53,32 @@ export function CompactProjectPicker({
   }, [projects, search]);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-10 justify-start border-0 px-3 text-left"
-        >
-          <PlusCircleIcon data-icon="inline-start" />
-          <span className="truncate">{selectedProject?.name ?? "Project"}</span>
-        </Button>
-      </PopoverTrigger>
+    <Popover open={open} onOpenChange={setOpen}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "relative shrink-0 rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  selectedProject
+                    ? "text-foreground hover:text-foreground/70"
+                    : "text-muted-foreground/50 hover:text-muted-foreground",
+                )}
+              >
+                <FolderIcon className="size-4" />
+                {selectedProject && (
+                  <span className="absolute right-0.5 top-0.5 size-1.5 rounded-full bg-primary" />
+                )}
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            {selectedProject ? `Project: ${selectedProject.name}` : "Add project"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <PopoverContent align="start" className="w-80">
         <PopoverHeader>
           <PopoverTitle>Project</PopoverTitle>

@@ -2,7 +2,7 @@ import type { TrackerTag } from "@open-learn/api/modules/time-tracker/time-track
 import type { TrackerOverviewRange } from "../utils/date-time";
 
 import { useMemo, useState } from "react";
-import { PlusCircleIcon, TagsIcon } from "lucide-react";
+import { PlusCircleIcon, TagIcon } from "lucide-react";
 import { Badge } from "@open-learn/ui/components/badge";
 import { Button } from "@open-learn/ui/components/button";
 import { Input } from "@open-learn/ui/components/input";
@@ -15,6 +15,12 @@ import {
   PopoverTrigger,
 } from "@open-learn/ui/components/popover";
 import { Separator } from "@open-learn/ui/components/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-learn/ui/components/tooltip";
 import { cn } from "@open-learn/ui/lib/utils";
 
 import { useCreateTag } from "../services/mutations";
@@ -27,6 +33,7 @@ interface CompactTagPickerProps {
 }
 
 export function CompactTagPicker({ value, onChange, tags, range }: CompactTagPickerProps) {
+  const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const createTag = useCreateTag(range);
@@ -42,23 +49,36 @@ export function CompactTagPicker({ value, onChange, tags, range }: CompactTagPic
   }, [search, tags]);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-10 justify-start border-0 px-3 text-left"
-        >
-          <TagsIcon data-icon="inline-start" />
-          <span className="truncate">
+    <Popover open={open} onOpenChange={setOpen}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "relative shrink-0 rounded p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  selectedTags.length > 0
+                    ? "text-foreground hover:text-foreground/70"
+                    : "text-muted-foreground/50 hover:text-muted-foreground",
+                )}
+              >
+                <TagIcon className="size-4" />
+                {selectedTags.length > 0 && (
+                  <span className="absolute right-0.5 top-0.5 size-1.5 rounded-full bg-primary" />
+                )}
+              </button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
             {selectedTags.length === 0
-              ? "Tags"
+              ? "Add tags"
               : selectedTags.length === 1
-                ? selectedTags[0]?.name
-                : `${selectedTags.length} tags`}
-          </span>
-        </Button>
-      </PopoverTrigger>
+                ? `Tag: ${selectedTags[0]?.name}`
+                : `${selectedTags.length} tags selected`}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       <PopoverContent align="start" className="w-80">
         <PopoverHeader>
           <PopoverTitle>Tags</PopoverTitle>

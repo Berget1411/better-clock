@@ -13,7 +13,7 @@
     "generate": "dotenv -f ../../apps/server/.env run -- bun x @better-auth/cli@latest generate --config src/index.ts --output ../db/src/schema/auth.ts"
   },
   "dependencies": {
-    "@better-auth/infra": "^0.1.8",
+    "@better-auth/infra": "^0.2.0",
     "@open-learn/db": "workspace:*",
     "@open-learn/env": "workspace:*",
     "@polar-sh/better-auth": "catalog:",

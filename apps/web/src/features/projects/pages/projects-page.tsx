@@ -168,11 +168,7 @@ export default function ProjectsPage() {
       </AppPageHeader>
 
       <AppSurface>
-        <AppSurfaceHeader
-          label="Portfolio"
-          title="Filter and organise projects"
-          description="Keep status, access, billing, and search controls together in one clear management surface."
-        />
+        <AppSurfaceHeader label="Portfolio" />
 
         <div className="flex flex-wrap items-center gap-3 border-b border-border/60 px-4 py-3">
           <ToggleGroup

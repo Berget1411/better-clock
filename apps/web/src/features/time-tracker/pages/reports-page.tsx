@@ -335,8 +335,6 @@ export default function ReportsPage() {
       <AppSurface className="overflow-hidden border-border/70 bg-muted/10">
         <AppSurfaceHeader
           label="Filters"
-          title="Refine the report"
-          description="Keep the chart, detailed table, and export output aligned from one focused control row."
           actions={
             <Button
               variant="outline"

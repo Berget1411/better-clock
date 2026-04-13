@@ -72,15 +72,7 @@ export default function TimeTrackerPage() {
         </AppPageHeader>
 
         <AppSurface>
-          <AppSurfaceHeader
-            label="Capture"
-            title={mode === "timer" ? "Track work live" : "Add time after the fact"}
-            description={
-              mode === "timer"
-                ? "Keep the current task in focus and expand details only when you need them."
-                : "Use manual mode when the work is already done and the exact time is known."
-            }
-          />
+          <AppSurfaceHeader label="Capture" />
           <div className="p-4">
             <TabsContent value="timer" className="mt-0">
               <TimerEntryForm
@@ -104,11 +96,7 @@ export default function TimeTrackerPage() {
         </AppSurface>
 
         <AppSurface>
-          <AppSurfaceHeader
-            label="History"
-            title="Recent activity"
-            description="Entries stay grouped by week and day so edits remain scannable."
-          />
+          <AppSurfaceHeader label="History" />
           <div className="p-4">
             <ActivityHistoryList
               entries={entries}

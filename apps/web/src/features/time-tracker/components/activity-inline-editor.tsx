@@ -129,7 +129,8 @@ export function ActivityInlineEditor({
 
                 return (
                   <>
-                    <div className="flex flex-col gap-2 rounded-none border bg-card p-2 md:flex-row md:items-center md:gap-2">
+                    <div className="flex flex-col gap-2 rounded-none border bg-card p-2 md:flex-row md:items-center md:gap-1.5">
+                      {/* Description / task — grows to fill space */}
                       <form.Field name="taskId">
                         {(taskField) => (
                           <ActivityReferenceInput
@@ -150,38 +151,45 @@ export function ActivityInlineEditor({
                         )}
                       </form.Field>
 
-                      <form.Field name="projectId">
-                        {(projectField) => (
-                          <form.Field name="taskId">
-                            {(taskField) => (
-                              <CompactProjectPicker
-                                value={projectField.state.value}
-                                onChange={(projectId) => {
-                                  projectField.handleChange(projectId);
-                                  taskField.handleChange(
-                                    getCompatibleTaskId(tasks, taskField.state.value, projectId),
-                                  );
-                                }}
-                                projects={projects}
-                                range={range}
-                              />
-                            )}
-                          </form.Field>
-                        )}
-                      </form.Field>
+                      {/* Project + tag icon buttons */}
+                      <div className="flex items-center">
+                        <form.Field name="projectId">
+                          {(projectField) => (
+                            <form.Field name="taskId">
+                              {(taskField) => (
+                                <CompactProjectPicker
+                                  value={projectField.state.value}
+                                  onChange={(projectId) => {
+                                    projectField.handleChange(projectId);
+                                    taskField.handleChange(
+                                      getCompatibleTaskId(tasks, taskField.state.value, projectId),
+                                    );
+                                  }}
+                                  projects={projects}
+                                  range={range}
+                                />
+                              )}
+                            </form.Field>
+                          )}
+                        </form.Field>
 
-                      <form.Field name="tagIds">
-                        {(tagField) => (
-                          <CompactTagPicker
-                            value={tagField.state.value}
-                            onChange={tagField.handleChange}
-                            tags={tags}
-                            range={range}
-                          />
-                        )}
-                      </form.Field>
+                        <form.Field name="tagIds">
+                          {(tagField) => (
+                            <CompactTagPicker
+                              value={tagField.state.value}
+                              onChange={tagField.handleChange}
+                              tags={tags}
+                              range={range}
+                            />
+                          )}
+                        </form.Field>
+                      </div>
 
-                      <div className="flex flex-wrap gap-2 md:flex-nowrap">
+                      {/* Divider */}
+                      <div className="hidden h-6 w-px shrink-0 bg-border md:block" />
+
+                      {/* Time range + duration + date */}
+                      <div className="flex items-center gap-1.5">
                         <form.Field name="startTime">
                           {(field) => (
                             <Input
@@ -190,11 +198,13 @@ export function ActivityInlineEditor({
                               onBlur={field.handleBlur}
                               onChange={(event) => field.handleChange(event.target.value)}
                               aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                              className="h-10 w-full min-w-24 text-sm md:w-28"
+                              className="h-8 w-24 text-sm tabular-nums"
                             />
                           )}
                         </form.Field>
-                        <div className="flex h-10 items-center text-muted-foreground">–</div>
+
+                        <span className="text-xs text-muted-foreground">–</span>
+
                         <form.Field name="endTime">
                           {(field) => (
                             <Input
@@ -203,45 +213,62 @@ export function ActivityInlineEditor({
                               onBlur={field.handleBlur}
                               onChange={(event) => field.handleChange(event.target.value)}
                               aria-invalid={field.state.meta.isTouched && !field.state.meta.isValid}
-                              className="h-10 w-full min-w-24 text-sm md:w-28"
+                              className="h-8 w-24 text-sm tabular-nums"
+                            />
+                          )}
+                        </form.Field>
+
+                        <span className="min-w-14 text-center text-xs font-medium tabular-nums text-muted-foreground">
+                          {formatDuration(durationSeconds)}
+                        </span>
+
+                        <form.Field name="date">
+                          {(field) => (
+                            <CompactDatePicker
+                              value={field.state.value}
+                              onChange={field.handleChange}
+                              label={formatRelativeDateLabel(field.state.value)}
                             />
                           )}
                         </form.Field>
                       </div>
 
-                      <form.Field name="date">
-                        {(field) => (
-                          <CompactDatePicker
-                            value={field.state.value}
-                            onChange={field.handleChange}
-                            label={formatRelativeDateLabel(field.state.value)}
-                          />
-                        )}
-                      </form.Field>
-
-                      <div className="flex min-w-32 items-center justify-center px-3 text-lg font-semibold tabular-nums text-foreground">
-                        {formatDuration(durationSeconds)}
-                      </div>
-
-                      <form.Subscribe selector={(state) => ({ isSubmitting: state.isSubmitting })}>
-                        {({ isSubmitting }) => (
-                          <div className="flex gap-2">
-                            <Button type="submit" disabled={isSubmitting || updateEntry.isPending}>
+                      <form.Subscribe
+                        selector={(state) => ({
+                          isSubmitting: state.isSubmitting,
+                          isDirty: state.isDirty,
+                        })}
+                      >
+                        {({ isSubmitting, isDirty }) => (
+                          <div className="flex shrink-0 items-center gap-1">
+                            <Button
+                              type="submit"
+                              size="sm"
+                              disabled={isSubmitting || updateEntry.isPending || !isDirty}
+                            >
                               Save
                             </Button>
                             <Button
                               type="button"
-                              variant="outline"
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground hover:text-destructive"
                               onClick={async () => {
                                 await deleteEntry.mutateAsync({ entryId: entry.id });
                                 onCancel();
                               }}
                               disabled={deleteEntry.isPending}
                             >
-                              <Trash2Icon />
+                              <Trash2Icon className="size-3.5" />
                             </Button>
-                            <Button type="button" variant="ghost" size="icon" onClick={onCancel}>
-                              <ChevronUpIcon />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground"
+                              onClick={onCancel}
+                            >
+                              <ChevronUpIcon className="size-3.5" />
                             </Button>
                           </div>
                         )}

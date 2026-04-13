@@ -2,6 +2,12 @@ import type { TaskListItem } from "@open-learn/api/modules/task/task.schema";
 
 import { PencilLineIcon, CheckSquareIcon } from "lucide-react";
 import { Input } from "@open-learn/ui/components/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@open-learn/ui/components/tooltip";
 
 import { CompactTaskPicker } from "./compact-task-picker";
 
@@ -43,19 +49,6 @@ export function ActivityReferenceInput({
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1.5">
-      <button
-        type="button"
-        onClick={toggle}
-        title={mode === "description" ? "Switch to task" : "Switch to write"}
-        className="shrink-0 rounded p-1 text-muted-foreground/50 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-      >
-        {mode === "description" ? (
-          <PencilLineIcon className="size-3.5" />
-        ) : (
-          <CheckSquareIcon className="size-3.5" />
-        )}
-      </button>
-
       <div className="min-w-0 flex-1">
         {mode === "task" ? (
           <CompactTaskPicker
@@ -76,6 +69,27 @@ export function ActivityReferenceInput({
           />
         )}
       </div>
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={toggle}
+              className="shrink-0 rounded p-1.5 text-muted-foreground/50 transition-colors hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {mode === "description" ? (
+                <CheckSquareIcon className="size-4" />
+              ) : (
+                <PencilLineIcon className="size-4" />
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {mode === "description" ? "Switch to task" : "Switch to description"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

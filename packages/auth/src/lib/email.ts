@@ -19,6 +19,64 @@ function createTransporter() {
   });
 }
 
+export async function sendVerificationEmail({
+  to,
+  verificationUrl,
+}: {
+  to: string;
+  verificationUrl: string;
+}) {
+  const transporter = createTransporter();
+
+  await transporter.sendMail({
+    from: `"better clock" <${env.GMAIL_USER}>`,
+    to,
+    subject: "Verify your email address",
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a1a;">
+        <h2 style="font-size: 20px; margin-bottom: 8px;">Verify your email</h2>
+        <p style="margin-bottom: 16px; color: #555;">
+          Click the button below to verify your email address and activate your better clock account.
+        </p>
+        <a href="${escapeHtml(verificationUrl)}"
+           style="display: inline-block; padding: 10px 20px; background: #18a0a0; color: #fff;
+                  text-decoration: none; font-weight: 600; border-radius: 4px;">
+          Verify email
+        </a>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          If you did not create a better clock account, you can safely ignore this email.
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendResetPasswordEmail({ to, resetUrl }: { to: string; resetUrl: string }) {
+  const transporter = createTransporter();
+
+  await transporter.sendMail({
+    from: `"better clock" <${env.GMAIL_USER}>`,
+    to,
+    subject: "Reset your password",
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a1a;">
+        <h2 style="font-size: 20px; margin-bottom: 8px;">Reset your password</h2>
+        <p style="margin-bottom: 16px; color: #555;">
+          We received a request to reset your better clock password. Click the button below to set a new password.
+        </p>
+        <a href="${escapeHtml(resetUrl)}"
+           style="display: inline-block; padding: 10px 20px; background: #18a0a0; color: #fff;
+                  text-decoration: none; font-weight: 600; border-radius: 4px;">
+          Reset password
+        </a>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This link expires in 1 hour. If you did not request a password reset, you can safely ignore this email.
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendInvitationEmail({
   to,
   inviterName,

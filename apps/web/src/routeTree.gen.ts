@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as SuccessRouteImport } from "./routes/success";
+import { Route as ResetPasswordRouteImport } from "./routes/reset-password";
 import { Route as LoginRouteImport } from "./routes/login";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as AppAppRouteImport } from "./routes/app._app";
@@ -32,10 +33,16 @@ import { Route as AppAppManageTeamsRouteImport } from "./routes/app._app.manage.
 import { Route as AppAppManageTagsRouteImport } from "./routes/app._app.manage.tags";
 import { Route as AppAppManageProjectsRouteImport } from "./routes/app._app.manage.projects";
 import { Route as AppAppManageClientsRouteImport } from "./routes/app._app.manage.clients";
+import { Route as AppAppAdminUsersRouteImport } from "./routes/app._app.admin.users";
 
 const SuccessRoute = SuccessRouteImport.update({
   id: "/success",
   path: "/success",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: "/reset-password",
+  path: "/reset-password",
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginRoute = LoginRouteImport.update({
@@ -148,10 +155,16 @@ const AppAppManageClientsRoute = AppAppManageClientsRouteImport.update({
   path: "/clients",
   getParentRoute: () => AppAppManageRoute,
 } as any);
+const AppAppAdminUsersRoute = AppAppAdminUsersRouteImport.update({
+  id: "/admin/users",
+  path: "/admin/users",
+  getParentRoute: () => AppAppRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
+  "/reset-password": typeof ResetPasswordRoute;
   "/success": typeof SuccessRoute;
   "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
   "/app": typeof AppAppRouteWithChildren;
@@ -168,6 +181,7 @@ export interface FileRoutesByFullPath {
   "/app/teams": typeof AppAppTeamsRoute;
   "/app/tracker": typeof AppAppTrackerRoute;
   "/app/": typeof AppAppIndexRoute;
+  "/app/admin/users": typeof AppAppAdminUsersRoute;
   "/app/manage/clients": typeof AppAppManageClientsRoute;
   "/app/manage/projects": typeof AppAppManageProjectsRoute;
   "/app/manage/tags": typeof AppAppManageTagsRoute;
@@ -177,6 +191,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
+  "/reset-password": typeof ResetPasswordRoute;
   "/success": typeof SuccessRoute;
   "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
   "/app/ai": typeof AppAppAiRoute;
@@ -191,6 +206,7 @@ export interface FileRoutesByTo {
   "/app/teams": typeof AppAppTeamsRoute;
   "/app/tracker": typeof AppAppTrackerRoute;
   "/app": typeof AppAppIndexRoute;
+  "/app/admin/users": typeof AppAppAdminUsersRoute;
   "/app/manage/clients": typeof AppAppManageClientsRoute;
   "/app/manage/projects": typeof AppAppManageProjectsRoute;
   "/app/manage/tags": typeof AppAppManageTagsRoute;
@@ -201,6 +217,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
+  "/reset-password": typeof ResetPasswordRoute;
   "/success": typeof SuccessRoute;
   "/accept-invitation/$invitationId": typeof AcceptInvitationInvitationIdRoute;
   "/app/_app": typeof AppAppRouteWithChildren;
@@ -217,6 +234,7 @@ export interface FileRoutesById {
   "/app/_app/teams": typeof AppAppTeamsRoute;
   "/app/_app/tracker": typeof AppAppTrackerRoute;
   "/app/_app/": typeof AppAppIndexRoute;
+  "/app/_app/admin/users": typeof AppAppAdminUsersRoute;
   "/app/_app/manage/clients": typeof AppAppManageClientsRoute;
   "/app/_app/manage/projects": typeof AppAppManageProjectsRoute;
   "/app/_app/manage/tags": typeof AppAppManageTagsRoute;
@@ -228,6 +246,7 @@ export interface FileRouteTypes {
   fullPaths:
     | "/"
     | "/login"
+    | "/reset-password"
     | "/success"
     | "/accept-invitation/$invitationId"
     | "/app"
@@ -244,6 +263,7 @@ export interface FileRouteTypes {
     | "/app/teams"
     | "/app/tracker"
     | "/app/"
+    | "/app/admin/users"
     | "/app/manage/clients"
     | "/app/manage/projects"
     | "/app/manage/tags"
@@ -253,6 +273,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/login"
+    | "/reset-password"
     | "/success"
     | "/accept-invitation/$invitationId"
     | "/app/ai"
@@ -267,6 +288,7 @@ export interface FileRouteTypes {
     | "/app/teams"
     | "/app/tracker"
     | "/app"
+    | "/app/admin/users"
     | "/app/manage/clients"
     | "/app/manage/projects"
     | "/app/manage/tags"
@@ -276,6 +298,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/login"
+    | "/reset-password"
     | "/success"
     | "/accept-invitation/$invitationId"
     | "/app/_app"
@@ -292,6 +315,7 @@ export interface FileRouteTypes {
     | "/app/_app/teams"
     | "/app/_app/tracker"
     | "/app/_app/"
+    | "/app/_app/admin/users"
     | "/app/_app/manage/clients"
     | "/app/_app/manage/projects"
     | "/app/_app/manage/tags"
@@ -302,6 +326,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   LoginRoute: typeof LoginRoute;
+  ResetPasswordRoute: typeof ResetPasswordRoute;
   SuccessRoute: typeof SuccessRoute;
   AcceptInvitationInvitationIdRoute: typeof AcceptInvitationInvitationIdRoute;
   AppAppRoute: typeof AppAppRouteWithChildren;
@@ -314,6 +339,13 @@ declare module "@tanstack/react-router" {
       path: "/success";
       fullPath: "/success";
       preLoaderRoute: typeof SuccessRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/reset-password": {
+      id: "/reset-password";
+      path: "/reset-password";
+      fullPath: "/reset-password";
+      preLoaderRoute: typeof ResetPasswordRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/login": {
@@ -470,6 +502,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppAppManageClientsRouteImport;
       parentRoute: typeof AppAppManageRoute;
     };
+    "/app/_app/admin/users": {
+      id: "/app/_app/admin/users";
+      path: "/admin/users";
+      fullPath: "/app/admin/users";
+      preLoaderRoute: typeof AppAppAdminUsersRouteImport;
+      parentRoute: typeof AppAppRoute;
+    };
   }
 }
 
@@ -505,6 +544,7 @@ interface AppAppRouteChildren {
   AppAppTeamsRoute: typeof AppAppTeamsRoute;
   AppAppTrackerRoute: typeof AppAppTrackerRoute;
   AppAppIndexRoute: typeof AppAppIndexRoute;
+  AppAppAdminUsersRoute: typeof AppAppAdminUsersRoute;
 }
 
 const AppAppRouteChildren: AppAppRouteChildren = {
@@ -521,6 +561,7 @@ const AppAppRouteChildren: AppAppRouteChildren = {
   AppAppTeamsRoute: AppAppTeamsRoute,
   AppAppTrackerRoute: AppAppTrackerRoute,
   AppAppIndexRoute: AppAppIndexRoute,
+  AppAppAdminUsersRoute: AppAppAdminUsersRoute,
 };
 
 const AppAppRouteWithChildren = AppAppRoute._addFileChildren(AppAppRouteChildren);
@@ -528,6 +569,7 @@ const AppAppRouteWithChildren = AppAppRoute._addFileChildren(AppAppRouteChildren
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SuccessRoute: SuccessRoute,
   AcceptInvitationInvitationIdRoute: AcceptInvitationInvitationIdRoute,
   AppAppRoute: AppAppRouteWithChildren,

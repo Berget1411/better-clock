@@ -20,6 +20,9 @@ const app = await alchemy("open-clock", {
 // corresponding file, overriding CORS_ORIGIN/BETTER_AUTH_URL with Cloudflare URLs.
 config({ path: `./.env.${app.stage}`, override: true });
 
+const serverPublicUrl = alchemy.env.BETTER_AUTH_URL!;
+const serverPublicHostname = new URL(serverPublicUrl).hostname;
+
 export const server = await Worker("server", {
   cwd: "../../apps/server",
   entrypoint: "src/index.ts",
@@ -48,7 +51,7 @@ export const web = await Vite("web", {
   cwd: "../../apps/web",
   assets: "dist",
   bindings: {
-    VITE_SERVER_URL: server.url,
+    VITE_SERVER_URL: serverPublicUrl,
     VITE_AI_ENABLED: process.env.VITE_AI_ENABLED ?? "false",
     DEV_PORT: "3001",
   },
@@ -56,6 +59,7 @@ export const web = await Vite("web", {
 
 console.log(`Web    -> ${web.url}`);
 console.log(`Server -> ${server.url}`);
+console.log(`API    -> ${serverPublicUrl}`);
 
 // Ensure the Cloudflare Access application protecting the server worker has a
 // bypass policy for /api/auth/* so that Better Auth's sign-in endpoints are
@@ -70,13 +74,12 @@ if (process.env.CLOUDFLARE_API_TOKEN) {
   const cf = await createCloudflareApi();
 
   // Find the Access application for this server worker hostname.
-  const serverHostname = new URL(server.url).hostname;
   const appsRes = await cf.get(`/accounts/${cf.accountId}/access/apps`);
   const appsJson = (await appsRes.json()) as {
     result: Array<{ id: string; domain: string; name: string }>;
   };
   const accessApp = appsJson.result?.find(
-    (a) => a.domain === serverHostname || a.domain === `${serverHostname}/*`,
+    (a) => a.domain === serverPublicHostname || a.domain === `${serverPublicHostname}/*`,
   );
 
   if (accessApp) {
@@ -102,14 +105,14 @@ if (process.env.CLOUDFLARE_API_TOKEN) {
         `/accounts/${cf.accountId}/access/apps/${accessApp.id}/policies/${bypassPolicy.id}`,
         bypassBody,
       );
-      console.log(`Access: updated bypass policy on ${serverHostname}/api/auth/*`);
+      console.log(`Access: updated bypass policy on ${serverPublicHostname}/api/auth/*`);
     } else {
       await cf.post(`/accounts/${cf.accountId}/access/apps/${accessApp.id}/policies`, bypassBody);
-      console.log(`Access: created bypass policy on ${serverHostname}/api/auth/*`);
+      console.log(`Access: created bypass policy on ${serverPublicHostname}/api/auth/*`);
     }
   } else {
     console.warn(
-      `Access: no Access application found for ${serverHostname} — skipping bypass policy.\n` +
+      `Access: no Access application found for ${serverPublicHostname} — skipping bypass policy.\n` +
         `If the server worker is protected by Cloudflare Access, add a bypass policy\n` +
         `for /api/auth/* manually in the Zero Trust dashboard.`,
     );

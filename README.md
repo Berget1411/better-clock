@@ -1,4 +1,4 @@
-# template
+# Better Clock
 
 ## Features
 

@@ -23,9 +23,9 @@ jobs:
       GMAIL_USER: ${{ secrets.GMAIL_USER }}
       # Dev-specific
       DATABASE_URL: ${{ secrets.DATABASE_URL_DEV }}
-      CORS_ORIGIN: https://open-clock-web-dev.ludvig1411.workers.dev
-      BETTER_AUTH_URL: https://open-clock-server-dev.ludvig1411.workers.dev
-      POLAR_SUCCESS_URL: https://open-clock-web-dev.ludvig1411.workers.dev/success?checkout_id={CHECKOUT_ID}
+      CORS_ORIGIN: https://betterclock.dev.bergstromlabs.com
+      BETTER_AUTH_URL: https://betterclock.dev.api.bergstromlabs.com
+      POLAR_SUCCESS_URL: https://betterclock.dev.bergstromlabs.com/success?checkout_id={CHECKOUT_ID}
 
     steps:
       - uses: actions/checkout@v4
